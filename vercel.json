@@ -1,0 +1,35 @@
+{
+  "buildCommand": "prisma generate && next build",
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "regions": ["iad1"],
+  "functions": {
+    "app/api/get-next-completion-stream-promise/route.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    },
+    "app/api/project-count/route.ts": {
+      "memory": 128,
+      "maxDuration": 10
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/project-count",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
+        {
+          "key": "Pragma",
+          "value": "no-cache"
+        },
+        {
+          "key": "Expires",
+          "value": "0"
+        }
+      ]
+    }
+  ]
+} 
