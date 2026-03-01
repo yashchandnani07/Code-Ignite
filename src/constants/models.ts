@@ -1,0 +1,79 @@
+import type { ApiProvider, ModelOption } from '../types';
+
+/**
+ * Available AI models by provider.
+ * The first entry for each provider is the default model.
+ */
+export const AI_MODELS: Record<ApiProvider, ModelOption[]> = {
+    'Google AI': [
+        {
+            id: 'gemini-3-flash-preview',
+            name: 'Gemini 3 Flash (Preview)',
+            description: 'Latest Gemini 3 — default',
+        },
+        {
+            id: 'gemini-2.0-flash',
+            name: 'Gemini 2.0 Flash',
+            description: 'Fast and capable',
+        },
+        {
+            id: 'gemini-1.5-pro',
+            name: 'Gemini 1.5 Pro',
+            description: 'Most capable Google model',
+        },
+    ],
+    Openrouter: [
+        {
+            id: 'google/gemini-2.0-flash-exp:free',
+            name: 'Gemini 2.0 Flash (via OpenRouter)',
+            description: 'Free tier available',
+        },
+        {
+            id: 'anthropic/claude-3.5-sonnet',
+            name: 'Claude 3.5 Sonnet (via OpenRouter)',
+            description: 'Best for complex reasoning',
+        },
+        {
+            id: 'openai/gpt-4o',
+            name: 'GPT-4o (via OpenRouter)',
+            description: 'Most capable (Expensive)',
+        },
+    ],
+    Openai: [
+        {
+            id: 'gpt-4.1-mini',
+            name: 'GPT-4.1 Mini',
+            description: 'Fast, cost-effective general model',
+        },
+        {
+            id: 'gpt-4.1',
+            name: 'GPT-4.1',
+            description: 'Flagship OpenAI model',
+        },
+    ],
+    Claude: [
+        {
+            id: 'claude-opus-4-5',
+            name: 'Claude Opus 4.5',
+            description: 'Most capable Anthropic model',
+        },
+        {
+            id: 'claude-3-5-sonnet-20241022',
+            name: 'Claude 3.5 Sonnet',
+            description: 'Best for deep reasoning and code',
+        },
+    ],
+    'OpenAI-compatible': [
+        {
+            id: 'custom-model',
+            name: 'Custom OpenAI-style Model',
+            description: 'Use the model ID from your OpenAI-compatible provider',
+        },
+    ],
+};
+
+/** Default provider — Google AI with user's own API key (BYOK) */
+export const DEFAULT_PROVIDER: ApiProvider = 'Google AI';
+
+export const getDefaultModel = (provider: ApiProvider): string =>
+    AI_MODELS[provider][0].id;
