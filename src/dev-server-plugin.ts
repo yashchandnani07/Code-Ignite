@@ -4,8 +4,6 @@ import expressApp from '../api/deploy.js';
 // @ts-ignore
 import sttApp from '../api/stt.js';
 // @ts-ignore
-import freeAiApp from '../api/ai-free.js';
-// @ts-ignore
 import validateAiApp from '../api/ai-validate.js';
 
 export function expressDevServerPlugin(): Plugin {
@@ -14,7 +12,6 @@ export function expressDevServerPlugin(): Plugin {
         configureServer(server: ViteDevServer) {
             server.middlewares.use(expressApp);
             server.middlewares.use(sttApp);
-            server.middlewares.use(freeAiApp);
             server.middlewares.use(validateAiApp);
         }
     }
