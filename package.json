@@ -28,11 +28,13 @@
     "monaco-editor": "^0.55.1",
     "multer": "^2.0.2",
     "node-fetch": "^3.3.2",
+    "ogl": "^1.0.11",
     "openai": "^6.9.1",
     "pdfjs-dist": "^5.4.449",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwind-merge": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7",
     "three": "^0.182.0",
     "vanilla-tilt": "^1.8.1"
   },

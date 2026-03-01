@@ -7,14 +7,7 @@ import type { ActiveTab } from '../types';
  * Manages app navigation state: landing page, tabs, modals
  */
 export function useAppNavigation() {
-    // Check if returning user (has API key + visited before)
-    const hasUsedBefore = () => {
-        const apiKey = storage.getString(STORAGE_KEYS.API_KEY);
-        const hasVisited = storage.getString(STORAGE_KEYS.HAS_VISITED);
-        return !!(apiKey && hasVisited);
-    };
-
-    const [showLanding, setShowLanding] = useState(!hasUsedBefore());
+    const [showLanding, setShowLanding] = useState(true);
     const [activeTab, setActiveTab] = useState<ActiveTab>('chat');
     const [showSettings, setShowSettings] = useState(false);
     const [showDeploy, setShowDeploy] = useState(false);
