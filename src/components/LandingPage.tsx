@@ -7,6 +7,7 @@ import {
   MessageSquare, BotMessageSquare, Sparkles, ExternalLink
 } from "lucide-react";
 import GradientBlinds from "@/components/GradientBlinds";
+import { HoverBorderGradient } from "@/components/ui/hover-border-gradient";
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -167,9 +168,14 @@ const Hero = ({ onGetStarted }: { onGetStarted: () => void }) => (
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button onClick={onGetStarted} className="inline-flex items-center justify-center h-14 px-10 text-base font-semibold bg-primary text-primary-foreground rounded-lg shadow-[0_0_30px_hsl(78_90%_60%/0.3)] hover:brightness-110 hover:shadow-[0_0_40px_hsl(78_90%_60%/0.5)] transition-all duration-300">
-            Start Building Free <ArrowRight className="ml-2 w-5 h-5" />
-          </button>
+          <HoverBorderGradient
+            onClick={onGetStarted}
+            containerClassName="rounded-full"
+            className="dark:bg-black bg-white text-black dark:text-white text-base font-semibold h-14 px-10 flex items-center space-x-2 border-none"
+          >
+            <span>Start Building Free</span>
+            <ArrowRight className="w-5 h-5" />
+          </HoverBorderGradient>
           <button className="inline-flex items-center justify-center h-14 px-10 text-base font-semibold border border-foreground/30 text-foreground rounded-lg hover:border-primary hover:text-primary transition-all duration-300">
             <Play className="mr-2 w-5 h-5" /> Watch Demo
           </button>
@@ -523,9 +529,16 @@ const FinalCTA = ({ onGetStarted }: { onGetStarted: () => void }) => {
             </span>
           </h2>
           <p className="text-muted-foreground text-lg mb-10 font-sans">Bring your API key and start creating in under a minute.</p>
-          <button onClick={onGetStarted} className="inline-flex items-center justify-center text-lg px-12 h-16 font-semibold bg-primary text-primary-foreground rounded-lg shadow-[0_0_30px_hsl(78_90%_60%/0.3)] hover:brightness-110 hover:shadow-[0_0_40px_hsl(78_90%_60%/0.5)] transition-all duration-300">
-            Launch Code Ignite <ArrowRight className="ml-2 w-5 h-5" />
-          </button>
+          <div className="flex justify-center">
+            <HoverBorderGradient
+              onClick={onGetStarted}
+              containerClassName="rounded-full"
+              className="dark:bg-black bg-white text-black dark:text-white text-lg font-semibold h-16 px-12 flex items-center space-x-2 border-none"
+            >
+              <span>Launch Code Ignite</span>
+              <ArrowRight className="w-5 h-5" />
+            </HoverBorderGradient>
+          </div>
         </motion.div>
       </div>
     </section>
