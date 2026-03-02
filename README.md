@@ -94,7 +94,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/Gouthamsai78/code-ignite.git
+git clone https://github.com/yashchandnani07
 cd code-ignite
 
 # Install dependencies
@@ -254,8 +254,8 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## 📬 Contact
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/Gouthamsai78/code-ignite/issues)
-- **Email**: gouthamsai78@gmail.com
+- **GitHub Issues**: [Report bugs or request features](https://github.com/yashchandnani07/Code-Ignite/issues)
+- **Email**: yashchandnani07@gmail.com
 
 ---
 

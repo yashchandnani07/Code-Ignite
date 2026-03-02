@@ -431,7 +431,7 @@ const FinalCTA = ({ onGetStarted }: { onGetStarted: () => void }) => {
 const Footer = () => (
   <footer className="border-t border-primary/30 py-6">
     <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-      <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm font-mono">
+      <a href="https://github.com/yashchandnani07" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm font-mono">
         <Github className="w-4 h-4" /> GitHub
       </a>
       <p className="text-sm text-muted-foreground font-sans flex items-center gap-1">
