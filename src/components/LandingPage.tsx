@@ -4,6 +4,7 @@ import {
   Brain, Mic, Paperclip, Monitor, GitCompare, CloudUpload,
   LayoutDashboard, ShoppingCart, User, Layers, Gamepad2, KanbanSquare,
   Shield, Lock, Server, Play, ArrowRight, Github, Heart,
+  MessageSquare, BotMessageSquare, Sparkles, ExternalLink
 } from "lucide-react";
 import GradientBlinds from "@/components/GradientBlinds";
 
@@ -331,6 +332,113 @@ const Features = () => (
 );
 
 /* ═══════════════════════════════════════════════════
+   TELEGRAM INTEGRATION
+   ═══════════════════════════════════════════════════ */
+
+const TelegramIntegration = () => (
+  <section className="py-24 md:py-32 overflow-hidden bg-background">
+    <div className="container mx-auto px-6 max-w-6xl">
+      <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+
+        {/* Left: Typography & Storytelling */}
+        <div className="flex-1 lg:max-w-lg relative z-10 w-full">
+          <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+            <span className="font-mono text-sm uppercase tracking-[0.2em] text-primary block mb-6 flex items-center gap-2">
+              <MessageSquare className="w-4 h-4" /> 02.5 // Telegram Bot
+            </span>
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl tracking-tight mb-6 leading-[1.05]">
+              Speak it into<br /><span className="italic text-muted-foreground">existence.</span>
+            </h2>
+            <p className="text-muted-foreground font-sans text-lg md:text-xl leading-relaxed mb-8">
+              Send a voice note while commuting. The neural engine parses your intent, builds the architecture, and the bot replies with a live, hosted URL.
+            </p>
+            <p className="text-base text-muted-foreground/80 font-mono border-l-2 border-[#2AABEE]/30 pl-4 py-1">
+              Zero friction. Pure creation.
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Right: Premium Chat UI Mockup */}
+        <div className="flex-1 w-full relative">
+          <div className="absolute inset-0 bg-[#2AABEE]/5 blur-[100px] rounded-full pointer-events-none" />
+
+          <motion.div
+            initial={{ opacity: 0, y: 30, rotateX: 10 }}
+            whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            style={{ perspective: 1000 }}
+            className="relative bg-card/40 border border-border/50 rounded-2xl p-4 md:p-6 shadow-2xl backdrop-blur-sm max-w-lg mx-auto"
+          >
+            {/* Header */}
+            <div className="flex items-center gap-3 border-b border-border/50 pb-4 mb-6">
+              <div className="w-10 h-10 rounded-full bg-[#2AABEE]/10 flex items-center justify-center border border-[#2AABEE]/20">
+                <BotMessageSquare className="w-5 h-5 text-[#2AABEE]" />
+              </div>
+              <div>
+                <h4 className="font-sans font-medium text-sm text-foreground">Code Ignite Bot</h4>
+                <p className="text-xs text-[#2AABEE] font-mono">online</p>
+              </div>
+            </div>
+
+            {/* Chat Flow */}
+            <div className="space-y-6 font-sans">
+
+              {/* User Voice Note */}
+              <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }} className="flex justify-end">
+                <div className="bg-[#2AABEE] text-white rounded-2xl rounded-tr-sm p-3 md:p-4 max-w-[85%] shadow-lg shadow-[#2AABEE]/20 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <Play className="w-4 h-4 text-white fill-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1 mb-1 relative">
+                      {/* Fake waveform */}
+                      {[0.4, 0.8, 0.5, 1, 0.3, 0.7, 0.9, 0.4, 0.6, 0.8, 0.5, 0.3].map((val, i) => (
+                        <div key={i} className="w-1 bg-white/60 rounded-full" style={{ height: `${val * 12 + 4}px` }} />
+                      ))}
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-white/70 font-mono self-end ml-2">0:14</span>
+                </div>
+              </motion.div>
+
+              <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.8 }} className="flex justify-start">
+                <span className="text-xs text-muted-foreground font-mono flex items-center gap-1.5 ml-1">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" /> Transcribing and building...
+                </span>
+              </motion.div>
+
+              {/* Bot Response Pill */}
+              <motion.div initial={{ opacity: 0, x: -20, scale: 0.95 }} whileInView={{ opacity: 1, x: 0, scale: 1 }} viewport={{ once: true }} transition={{ delay: 1.4 }} className="flex justify-start">
+                <div className="bg-muted/50 border border-border rounded-2xl rounded-tl-sm p-4 max-w-[90%] shadow-xl backdrop-blur-md">
+                  <p className="text-sm text-foreground mb-3 font-medium">Your application is ready! 🚀</p>
+
+                  {/* Embedded App Link Card */}
+                  <div className="bg-black/40 border border-border/50 rounded-xl p-3 flex gap-4 items-center mb-2 hover:bg-black/60 transition-colors cursor-pointer group">
+                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20 shrink-0 group-hover:border-primary/40 transition-colors">
+                      <LayoutDashboard className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                      <p className="text-xs font-medium text-foreground truncate">Dark Theme Dashboard</p>
+                      <p className="text-[10px] text-muted-foreground font-mono truncate mt-0.5">https://code-ignite.app/p/a7b9x</p>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+
+                  <span className="text-[10px] text-muted-foreground font-mono block text-right mt-2">Just now</span>
+                </div>
+              </motion.div>
+
+            </div>
+          </motion.div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+);
+
+/* ═══════════════════════════════════════════════════
    SHOWCASE
    ═══════════════════════════════════════════════════ */
 
@@ -463,6 +571,7 @@ const LandingPage = ({ onGetStarted }: LandingPageProps) => (
     <SocialProof />
     <HowItWorks />
     <Features />
+    <TelegramIntegration />
     <Showcase />
     <Privacy />
     <FinalCTA onGetStarted={onGetStarted} />
