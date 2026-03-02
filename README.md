@@ -246,12 +246,6 @@ npm run lint     # Run ESLint
 
 ---
 
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
----
-
 ## 📬 Contact
 
 - **GitHub Issues**: [Report bugs or request features](https://github.com/yashchandnani07/Code-Ignite/issues)
