@@ -25,7 +25,7 @@ const navLinks = [
 const steps = [
   { number: "01", title: "Describe", description: "Type your logic or speak it. Our neural engine deciphers intent into clean system design." },
   { number: "02", title: "Visualize", description: "Watch a real-time stream of code manifest into a sandboxed live preview instantly." },
-  { number: "03", title: "Deploy", description: "One click. Zero config. Your app lives on the edge via Netlify, Gist, or StackBlitz." },
+  { number: "03", title: "Deploy", description: "One click. Zero config. Your app lives on the edge via Netlify, Gist, or Instant Preview." },
 ];
 
 const features = [
@@ -34,7 +34,7 @@ const features = [
   { icon: Paperclip, number: "03", title: "File Attachments", description: "Upload images or PDFs; the AI reads and recreates them as code. From sketch to ship." },
   { icon: Monitor, number: "04", title: "Live Preview", description: "Sandboxed iframe preview updates in real time as code is generated. See every keystroke land." },
   { icon: GitCompare, number: "05", title: "Visual Diff Viewer", description: "See exactly what the AI changed, character by character. Accept or reject any edit with confidence." },
-  { icon: CloudUpload, number: "06", title: "One-Click Deploy", description: "Publish live to Netlify, GitHub Gist, or open in StackBlitz. Zero config, instant gratification." },
+  { icon: CloudUpload, number: "06", title: "One-Click Deploy", description: "Publish live to Netlify, GitHub Gist, or open in New Tab. Zero config, instant gratification." },
 ];
 
 const showcaseExamples = [
@@ -52,7 +52,7 @@ const privacyPoints = [
   { icon: Server, text: "Direct API calls — nothing passes through us" },
 ];
 
-const socialProofItems = ["Google Gemini", "OpenRouter", "Claude", "GPT-4", "Netlify", "GitHub Gist", "StackBlitz"];
+const socialProofItems = ["Google Gemini", "OpenRouter", "Claude", "GPT-4", "Netlify", "GitHub Gist"];
 
 const codeLines = [
   { num: 1, content: '<div class="app">', color: "text-foreground" },
@@ -435,7 +435,15 @@ const Footer = () => (
         <Github className="w-4 h-4" /> GitHub
       </a>
       <p className="text-sm text-muted-foreground font-sans flex items-center gap-1">
-        Made with <Heart className="w-3.5 h-3.5 text-primary fill-primary" /> by Yash Chandnani
+        Made with <Heart className="w-3.5 h-3.5 text-primary fill-primary" /> by{" "}
+        <a
+          href="https://github.com/yashchandnani07"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-primary transition-colors"
+        >
+          Yash Chandnani
+        </a>
       </p>
     </div>
   </footer>

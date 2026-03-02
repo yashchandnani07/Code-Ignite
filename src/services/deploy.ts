@@ -143,38 +143,4 @@ export async function deployToGitHubGist(
     }
 }
 
-/**
- * Create StackBlitz project URL
- * @param code - The HTML code to embed
- * @returns URL to open in StackBlitz
- */
-export function createStackBlitzUrl(_code: string): string {
-    // StackBlitz supports opening projects via URL with base64 encoded files
-    // For simplicity, we'll use their project creation endpoint
-    // Note: StackBlitz doesn't support inline code in URL for HTML projects directly
 
-    // Using StackBlitz's URL-based project creation
-    // This opens a new vanilla HTML project with the code
-    const baseUrl = 'https://stackblitz.com/edit/web-platform';
-
-    // StackBlitz doesn't support inline code in URL for HTML projects directly,
-    // so we'll use their API through a form POST or SDK
-    return baseUrl;
-}
-
-/**
- * Open code in StackBlitz using their SDK approach (form-based)
- * Returns form data that can be posted
- */
-export function createStackBlitzFormData(code: string): { project: object } {
-    return {
-        project: {
-            files: {
-                'index.html': code,
-            },
-            title: 'AI Coder Project',
-            description: 'Created with AI Coder by Goutham Sai',
-            template: 'html',
-        }
-    };
-}

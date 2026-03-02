@@ -68,7 +68,7 @@ const DeployModal: React.FC<DeployModalProps> = ({
         }
     };
 
-    const handleStackBlitzDeploy = () => {
+    const handleOpenNewTab = () => {
         const blob = new Blob([code], { type: 'text/html' });
         window.open(URL.createObjectURL(blob), '_blank');
     };
@@ -230,7 +230,7 @@ const DeployModal: React.FC<DeployModalProps> = ({
 
                             {/* ── Preview in new tab ── */}
                             <button
-                                onClick={handleStackBlitzDeploy}
+                                onClick={handleOpenNewTab}
                                 className="w-full flex items-center gap-4 p-4 rounded-xl bg-[hsl(var(--secondary))] hover:bg-[hsl(var(--accent))] border border-transparent hover:border-[hsl(var(--border))] transition-all group"
                             >
                                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 shrink-0">

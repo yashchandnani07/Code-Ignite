@@ -37,7 +37,6 @@
 ### 🚀 Advanced Deployment (ENHANCED!)
 - **Netlify (Standard)** - Zero-configuration, one-click full application deployment.
 - **GitHub Gist** - Permanent link with live preview.
-- **StackBlitz Integration** - Open your code in an advanced IDE environment.
 - **New Tab Preview** - Quick local testing.
 
 ### 🔄 Smart Change Management
@@ -139,7 +138,7 @@ Type what you want to create:
 
 ### 5. Deploy & Share
 - Click **🚀 Deploy** button
-- Choose CodePen, GitHub Gist, or New Tab
+- Choose Netlify, GitHub Gist, or New Tab
 - Share your creation with the world!
 
 ---
