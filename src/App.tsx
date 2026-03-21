@@ -11,6 +11,7 @@ import DiffViewer from './components/DiffViewer';
 import DeployModal from './components/DeployModal';
 import FileTree from './components/FileTree';
 import { ToastProvider, useToast } from './components/Toast';
+import { ApiKeyPopup } from './components/ApiKeyPopup';
 
 // Custom Hooks
 import { useApiSettings } from './hooks/useApiSettings';
@@ -42,6 +43,7 @@ function AppContent() {
   // UI-only state
   const [copied, setCopied] = useState(false);
   const [showFileTree, setShowFileTree] = useState(true);
+  const [isPopupDismissed, setIsPopupDismissed] = useState(false);
 
   // Toggle between single-file and multi-file mode
   const handleToggleMultiFile = () => {
@@ -215,6 +217,21 @@ function AppContent() {
           files={editor.files}
           onClose={navigation.closeDeploy}
           onOpenSettings={navigation.openSettings}
+        />
+      )}
+
+      {/* API Key Popup (Blocking Overlay for New Users) */}
+      {!apiSettings.hasApiKey && !isPopupDismissed && (
+        <ApiKeyPopup
+            apiKey={apiSettings.settings.apiKey}
+            setApiKey={apiSettings.setApiKey}
+            selectedModel={apiSettings.settings.model}
+            setSelectedModel={apiSettings.setModel}
+            selectedProvider={apiSettings.settings.provider}
+            setSelectedProvider={apiSettings.setProvider}
+            baseUrl={apiSettings.settings.baseUrl}
+            setBaseUrl={apiSettings.setBaseUrl}
+            onDismiss={() => setIsPopupDismissed(true)}
         />
       )}
 
