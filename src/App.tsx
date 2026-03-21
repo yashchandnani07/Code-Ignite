@@ -44,6 +44,7 @@ function AppContent() {
   const [copied, setCopied] = useState(false);
   const [showFileTree, setShowFileTree] = useState(true);
   const [isPopupDismissed, setIsPopupDismissed] = useState(false);
+  const [forceShowApiKeyPopup, setForceShowApiKeyPopup] = useState(false);
 
   // Toggle between single-file and multi-file mode
   const handleToggleMultiFile = () => {
@@ -205,6 +206,7 @@ function AppContent() {
           baseUrl={apiSettings.settings.baseUrl}
           setBaseUrl={apiSettings.setBaseUrl}
           onClose={navigation.closeSettings}
+          onOpenSetup={() => setForceShowApiKeyPopup(true)}
         />
       )}
 
@@ -221,7 +223,7 @@ function AppContent() {
       )}
 
       {/* API Key Popup (Blocking Overlay for New Users) */}
-      {!apiSettings.hasApiKey && !isPopupDismissed && (
+      {((!apiSettings.hasApiKey && !isPopupDismissed) || forceShowApiKeyPopup) && (
         <ApiKeyPopup
             apiKey={apiSettings.settings.apiKey}
             setApiKey={apiSettings.setApiKey}
@@ -231,7 +233,10 @@ function AppContent() {
             setSelectedProvider={apiSettings.setProvider}
             baseUrl={apiSettings.settings.baseUrl}
             setBaseUrl={apiSettings.setBaseUrl}
-            onDismiss={() => setIsPopupDismissed(true)}
+            onDismiss={() => {
+              setIsPopupDismissed(true);
+              setForceShowApiKeyPopup(false);
+            }}
         />
       )}
 

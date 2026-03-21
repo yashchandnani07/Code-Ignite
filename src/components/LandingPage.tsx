@@ -114,7 +114,7 @@ const Navbar = ({ onGetStarted }: { onGetStarted: () => void }) => {
 
         <button
           onClick={onGetStarted}
-          className="px-5 py-2.5 border border-foreground/10 text-foreground text-[0.8rem] font-semibold uppercase tracking-wide no-underline hover:bg-foreground hover:text-background hover:border-foreground transition-all cursor-pointer"
+          className="px-5 py-2.5 border border-foreground/10 text-foreground text-[0.8rem] font-semibold uppercase tracking-wide no-underline hover:bg-foreground hover:text-background hover:border-foreground rounded-full transition-all cursor-pointer"
           style={{ letterSpacing: "0.05em" }}
         >
           Start Building
@@ -167,7 +167,7 @@ const Hero = ({ onGetStarted }: { onGetStarted: () => void }) => (
           Describe what you want to build. Code Ignite writes the code, shows a live preview, and deploys it — all in seconds.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-5 mt-4">
           <HoverBorderGradient
             onClick={onGetStarted}
             containerClassName="rounded-full"
@@ -176,8 +176,9 @@ const Hero = ({ onGetStarted }: { onGetStarted: () => void }) => (
             <span>Start Building Free</span>
             <ArrowRight className="w-5 h-5" />
           </HoverBorderGradient>
-          <button className="inline-flex items-center justify-center h-14 px-10 text-base font-semibold border border-foreground/30 text-foreground rounded-lg hover:border-primary hover:text-primary transition-all duration-300">
-            <Play className="mr-2 w-5 h-5" /> Watch Demo
+
+          <button className="inline-flex items-center justify-center h-14 px-10 text-base font-semibold border border-white/10 text-white rounded-2xl hover:bg-white/5 hover:border-white/20 transition-all duration-300">
+            <Play className="mr-3 w-5 h-5 fill-white/10" /> Watch Demo
           </button>
         </div>
       </motion.div>
@@ -529,14 +530,14 @@ const FinalCTA = ({ onGetStarted }: { onGetStarted: () => void }) => {
             </span>
           </h2>
           <p className="text-muted-foreground text-lg mb-10 font-sans">Bring your API key and start creating in under a minute.</p>
-          <div className="flex justify-center">
+          <div className="flex justify-center mt-4">
             <HoverBorderGradient
               onClick={onGetStarted}
               containerClassName="rounded-full"
               className="dark:bg-black bg-white text-black dark:text-white text-lg font-semibold h-16 px-12 flex items-center space-x-2 border-none"
             >
               <span>Launch Code Ignite</span>
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-6 h-6" />
             </HoverBorderGradient>
           </div>
         </motion.div>

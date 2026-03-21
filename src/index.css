@@ -3,6 +3,19 @@
 @config "../tailwind.config.js";
 
 /* ───────────────────────────────────────────────────────────────
+   Autofill Override — frosted glass inputs
+   ─────────────────────────────────────────────────────────────── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.44) inset !important;
+  -webkit-text-fill-color: #1e1e3a !important;
+  caret-color: #6366f1;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* ───────────────────────────────────────────────────────────────
    21st.dev / shadcn-inspired Design System
    ─────────────────────────────────────────────────────────────── */
 

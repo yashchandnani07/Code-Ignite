@@ -17,6 +17,7 @@ interface SettingsModalProps {
     baseUrl: string;
     setBaseUrl: (url: string) => void;
     onClose: () => void;
+    onOpenSetup: () => void;
 }
 
 // Export for backward compatibility
@@ -42,6 +43,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     baseUrl,
     setBaseUrl,
     onClose,
+    onOpenSetup,
 }) => {
     const [activeTab, setActiveTab] = useState<'provider' | 'model' | 'deploy'>('provider');
     const [keyStatus, setKeyStatus] = useState<'idle' | 'testing' | 'valid' | 'invalid'>('idle');
@@ -254,6 +256,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                                 <>Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-[#00a3ff] hover:underline">Google AI Studio</a></>
                                             ) : selectedProvider === 'Openrouter' ? (
                                                 <>Get your key from <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer" className="text-[#00a3ff] hover:underline">openrouter.ai</a></>
+                                            ) : selectedProvider === 'Openai' ? (
+                                                <>Get your key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" className="text-[#00a3ff] hover:underline">OpenAI Dashboard</a></>
+                                            ) : selectedProvider === 'Claude' ? (
+                                                <>Get your key from <a href="https://platform.claude.com/dashboard" target="_blank" rel="noreferrer" className="text-[#00a3ff] hover:underline">Claude Dashboard</a></>
                                             ) : selectedProvider === 'OpenAI-compatible' ? (
                                                 <>Use any OpenAI-compatible endpoint (Together, Fireworks, DeepInfra, Novita, custom, etc.).</>
                                             ) : null}
@@ -283,6 +289,22 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                         />
                                     </div>
                                 )}
+
+                                <div className="pt-6 border-t border-[#2b2d31]">
+                                    <button
+                                        onClick={() => {
+                                            onClose();
+                                            onOpenSetup();
+                                        }}
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20 transition-all group"
+                                    >
+                                        <RefreshCw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
+                                        <span>Re-run Welcome Setup</span>
+                                    </button>
+                                    <p className="text-[10px] text-[#949ba4] mt-2 text-center">
+                                        Use this to re-configure your AI provider with the interactive guide.
+                                    </p>
+                                </div>
                             </div>
                         )}
 
