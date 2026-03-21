@@ -8,7 +8,7 @@ export function formatApiError(error: unknown): string {
     if (message.includes('401')) {
         return 'Invalid API key. Please check your settings.';
     }
-    if (message.includes('429')) {
+    if (message.includes('429') && !message.toLowerCase().includes('credit') && !message.toLowerCase().includes('balance')) {
         return 'Rate limit exceeded. Please wait a moment and try again.';
     }
     if (message.includes('400')) {
@@ -22,6 +22,12 @@ export function formatApiError(error: unknown): string {
     }
     if (message.includes('timeout')) {
         return 'Request timed out. Please try again.';
+    }
+
+    // Pass through billing or descriptive API errors from OpenRouter/OpenAI
+    const lowerMsg = message.toLowerCase();
+    if (lowerMsg.includes('credit') || lowerMsg.includes('balance') || lowerMsg.includes('quota')) {
+        return message; 
     }
 
     return 'Something went wrong. Check console for details.';

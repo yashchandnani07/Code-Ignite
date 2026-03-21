@@ -167,20 +167,23 @@ export function useCodeEditor(): EditorState & EditorActions {
     // ─── Multi-file actions ───────────────────────────────────────────
 
     /** AI writes a brand-new project (full generation). */
-    const setProject = useCallback((newFiles: FileSystem) => {
-        pushProjectToHistory(files);
+    const setProject = useCallback((newFiles: FileSystem, isStreaming?: boolean) => {
+        if (!isStreaming) pushProjectToHistory(files);
         persistFiles(newFiles);
         setProjectMode('multi');
-        // Open index.html by default, fall back to first file
-        const entry = newFiles['index.html']
-            ? 'index.html'
-            : Object.keys(newFiles)[0] ?? 'index.html';
-        setActiveFileRaw(entry);
+        // Open index.html by default, fall back to first file only when not streaming 
+        // to avoid active file stealing focus constantly during generation
+        if (!isStreaming) {
+            const entry = newFiles['index.html']
+                ? 'index.html'
+                : Object.keys(newFiles)[0] ?? 'index.html';
+            setActiveFileRaw(entry);
+        }
     }, [files, pushProjectToHistory, persistFiles, setProjectMode, setActiveFileRaw]);
 
     /** AI sends only the files it wants to add/modify (plus optional deletions). */
-    const updateFiles = useCallback((patches: FileSystem, deletions: string[] = []) => {
-        pushProjectToHistory(files);
+    const updateFiles = useCallback((patches: FileSystem, deletions: string[] = [], isStreaming?: boolean) => {
+        if (!isStreaming) pushProjectToHistory(files);
         const updated = { ...files, ...patches };
         deletions.forEach(p => delete updated[p]);
         persistFiles(updated);

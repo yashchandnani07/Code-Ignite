@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
     SAVED_CODE: 'saved_code',
     GITHUB_TOKEN: 'github_token',
     HAS_VISITED: 'has_visited_app',
+    FIREBASE_CONFIG: 'firebase_config',
     PROJECT_FILES: 'project_files',    // multi-file: JSON-serialised FileSystem
     PROJECT_MODE: 'project_mode',      // 'single' | 'multi'
     ACTIVE_FILE: 'active_file',        // currently open file path

@@ -22,6 +22,12 @@
 - **Instant Deployment** - The bot transcribes your vision and returns a live, hosted URL in seconds.
 - **Pocket Development** - Build and ship full-scale web applications directly from your phone.
 
+### 🗄️ Full-Stack Firebase Integration (NEW!)
+- **Bring Your Own Database** - Securely connect your Firebase Realtime Database using just a config snippet.
+- **Data-Driven Apps** - The AI generates apps with fully working read/write database operations automatically.
+- **Anonymous Auth** - Automatically secures generated apps using Firebase Anonymous Auth and user-scoped data rules.
+- **Zero Backend Setup** - Generates browser-compatible, CDN-based Firebase SDK integration with zero build steps required.
+
 ### 🤖 Advanced AI Generation
 - **Multi-Provider Support** - Google Gemini, Anthropic Claude, OpenAI (GPT-4o), and OpenRouter.
 - **Multi-File Projects (Mode 3)** - Generates complex project architectures, not just single files.

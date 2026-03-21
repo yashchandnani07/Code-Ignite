@@ -102,6 +102,31 @@ function compileDocument(
         }
     );
 
+    // --- 3. Inject Error Reporter (for iframe mode only) ---
+    if (mode === 'iframe') {
+        const errorReporter = `
+<script>
+window.onerror = function(msg, url, line, col, error) {
+    window.parent.postMessage({ type: 'preview-error', error: { message: msg, line: line, col: col, stack: error ? error.stack : undefined } }, '*');
+};
+window.addEventListener('unhandledrejection', function(event) {
+    window.parent.postMessage({ type: 'preview-error', error: { message: event.reason ? (event.reason.message || event.reason) : 'Unhandled Rejection', stack: event.reason ? event.reason.stack : undefined } }, '*');
+});
+const __originalConsoleError = console.error;
+console.error = function(...args) {
+    window.parent.postMessage({ type: 'preview-error', error: { message: args.join(' ') } }, '*');
+    __originalConsoleError.apply(console, args);
+};
+</script>`;
+        if (/<head>/i.test(html)) {
+            html = html.replace(/<head>/i, `<head>\n${errorReporter}`);
+        } else if (/<html>/i.test(html)) {
+            html = html.replace(/<html>/i, `<html>\n<head>${errorReporter}</head>`);
+        } else {
+            html = errorReporter + '\n' + html;
+        }
+    }
+
     // --- 4. Inject Blob Router (for blob mode only) ---
     if (mode === 'blob') {
         // We inject the entire file system and our compiler function into the blob 

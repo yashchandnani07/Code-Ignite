@@ -18,8 +18,8 @@
 import OpenAI from 'openai';
 import { GoogleGenerativeAI, type Part } from '@google/generative-ai';
 import Anthropic from '@anthropic-ai/sdk';
-import type { ApiProvider, FileAttachment, FileSystem } from '../types';
-import { SYSTEM_PROMPT } from './ai/system-prompt';
+import type { ApiProvider, FileAttachment, FileSystem, FirebaseConfig } from '../types';
+import { getSystemPrompt } from './ai/system-prompt';
 import { isMultiFileResponse, parseMultiFileResponse } from './ai/parseMultiFile';
 
 // ============================================================
@@ -38,6 +38,7 @@ interface ProviderArgs {
     /** Full virtual filesystem for multi-file projects */
     files?: FileSystem;
     projectMode?: 'single' | 'multi';
+    firebaseConfig?: FirebaseConfig | null;
 }
 
 // ============================================================
@@ -72,7 +73,7 @@ function buildUserPrompt(currentCode: string, files?: FileSystem, projectMode?: 
 // ============================================================
 
 const generateWithGoogleAI = async ({
-    apiKey, model, messages, currentCode, onChunk, attachments, files, projectMode,
+    apiKey, model, messages, currentCode, onChunk, attachments, files, projectMode, firebaseConfig
 }: ProviderArgs): Promise<{ code: string; summary: string }> => {
     const genAI = new GoogleGenerativeAI(apiKey);
 
@@ -82,7 +83,7 @@ const generateWithGoogleAI = async ({
 
     const generativeModel = genAI.getGenerativeModel({
         model: modelName,
-        systemInstruction: { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+        systemInstruction: { role: 'user', parts: [{ text: getSystemPrompt(firebaseConfig) }] },
     });
 
     const history = messages.map(m => ({
@@ -124,7 +125,7 @@ const generateWithGoogleAI = async ({
 // ============================================================
 
 const generateWithClaude = async ({
-    apiKey, model, messages, currentCode, onChunk, attachments, files, projectMode,
+    apiKey, model, messages, currentCode, onChunk, attachments, files, projectMode, firebaseConfig
 }: ProviderArgs): Promise<{ code: string; summary: string }> => {
 
     // Build Anthropic-format message list
@@ -167,7 +168,7 @@ const generateWithClaude = async ({
     const stream = await client.messages.create({
         model: model,
         max_tokens: 8192,
-        system: SYSTEM_PROMPT,
+        system: getSystemPrompt(firebaseConfig),
         messages: anthropicMessages as any,
         stream: true,
     }).catch(err => {
@@ -194,7 +195,7 @@ const generateWithClaude = async ({
 // ============================================================
 
 const generateWithOpenAICompatible = async (
-    { apiKey, model, messages, currentCode, onChunk, attachments, files, projectMode }: ProviderArgs,
+    { apiKey, model, messages, currentCode, onChunk, attachments, files, projectMode, firebaseConfig }: ProviderArgs,
     baseURL: string,
 ): Promise<{ code: string; summary: string }> => {
 
@@ -234,7 +235,7 @@ const generateWithOpenAICompatible = async (
     const stream = await openai.chat.completions.create({
         model,
         messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'system', content: getSystemPrompt(firebaseConfig) },
             ...messages.map(m => ({ role: m.role, content: m.content })),
             { role: 'user', content: lastUserContent as string }, // openai types accept string | content[]
         ],
@@ -259,7 +260,7 @@ const generateWithOpenAICompatible = async (
 // Custom OpenAI-compatible (completions endpoint) 
 // ============================================================
 const generateWithCustomOpenAI = async (
-    { apiKey, model, messages, currentCode, onChunk, files, projectMode }: ProviderArgs,
+    { apiKey, model, messages, currentCode, onChunk, files, projectMode, firebaseConfig }: ProviderArgs,
     baseURL: string,
 ): Promise<{ code: string; summary: string }> => {
     
@@ -267,7 +268,7 @@ const generateWithCustomOpenAI = async (
     
     let textContext = buildUserPrompt(currentCode, files, projectMode);
     
-    let fullPrompt = SYSTEM_PROMPT + '\n\n';
+    let fullPrompt = getSystemPrompt(firebaseConfig) + '\n\n';
     messages.forEach(m => fullPrompt += `${m.role}: ${m.content}\n`);
     fullPrompt += '\n\n' + textContext;
 
@@ -362,15 +363,16 @@ export const generateCodeStream = async (
     messages: ChatMessage[],
     currentCode: string,
     onChunk: (chunk: string) => void,
-    provider: ApiProvider = 'Openrouter',
+    provider: ApiProvider = 'OpenRouter',
     attachments?: FileAttachment[],
     baseUrlOverride?: string,
     files?: FileSystem,
     projectMode?: 'single' | 'multi',
+    firebaseConfig?: FirebaseConfig | null,
 ): Promise<{ code: string; summary: string; files?: FileSystem; deletions?: string[] }> => {
     try {
         const args: ProviderArgs = {
-            apiKey, model, messages, currentCode, onChunk, attachments, files, projectMode,
+            apiKey, model, messages, currentCode, onChunk, attachments, files, projectMode, firebaseConfig
         };
 
         let raw: { code: string; summary: string };
@@ -391,7 +393,7 @@ export const generateCodeStream = async (
                 }
                 raw = await generateWithCustomOpenAI(args, baseUrlOverride);
                 break;
-            case 'Openrouter':
+            case 'OpenRouter':
             default:
                 raw = await generateWithOpenRouter(args);
                 break;

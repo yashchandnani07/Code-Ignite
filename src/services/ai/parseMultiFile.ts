@@ -1,7 +1,6 @@
 import type { FileSystem } from '../../types';
 
 const FILE_MARKER = /^=== FILE: (.+?) ===/m;
-const END_MARKER = '=== END PROJECT ===';
 
 // Split pattern — every line that opens a FILE or DELETE section
 const SECTION_SPLIT = /^(?==== (?:FILE|DELETE): )/m;
@@ -38,17 +37,28 @@ export function parseMultiFileResponse(raw: string): {
     const files: FileSystem = {};
     const deletions: string[] = [];
 
-    // Strip the END marker
-    const cleaned = raw.replace(END_MARKER, '').trim();
+    let mainContent = raw;
+    let trailingText = '';
 
-    // Extract summary — everything before the first FILE or DELETE marker
-    const firstMarkerIndex = cleaned.search(/^=== (?:FILE|DELETE):/m);
-    const summary = firstMarkerIndex > 0
-        ? cleaned.slice(0, firstMarkerIndex).trim()
+    // Find the earliest end marker to truncate the file parsing
+    const endMatch = mainContent.match(/^(=== END PROJECT ===|---SUMMARY---)\s*/m);
+    if (endMatch && endMatch.index !== undefined) {
+        // We capture anything after the marker as trailing summary text
+        trailingText = mainContent.slice(endMatch.index + endMatch[0].length).trim();
+        // Truncate the main content so file parsing stops before the marker
+        mainContent = mainContent.slice(0, endMatch.index);
+    }
+
+    // Extract leading summary — everything before the first FILE or DELETE marker
+    const firstMarkerIndex = mainContent.search(/^=== (?:FILE|DELETE):/m);
+    const leadingSummary = firstMarkerIndex > 0
+        ? mainContent.slice(0, firstMarkerIndex).trim()
         : '';
 
+    const summary = [leadingSummary, trailingText].filter(Boolean).join('\n\n');
+
     // Split into sections on every line that starts a FILE or DELETE block
-    const sections = cleaned.split(SECTION_SPLIT);
+    const sections = mainContent.split(SECTION_SPLIT);
 
     for (const section of sections) {
         const trimmed = section.trim();
@@ -62,11 +72,10 @@ export function parseMultiFileResponse(raw: string): {
             continue;
         }
 
-        // ── FILE marker ─────────────────────────────────────────────
         const fileMatch = trimmed.match(/^=== FILE: ([^=]+?) ===\s*\n?([\s\S]*)$/);
         if (fileMatch) {
             const path = fileMatch[1].trim();
-            const content = fileMatch[2].replace(END_MARKER, '').trim();
+            const content = fileMatch[2].trim();
 
             // Safety guard: reject paths that look like mis-parsed DELETE directives
             if (!path || path.toUpperCase().startsWith('DELETE:')) {

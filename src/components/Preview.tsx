@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import { ExternalLink, Monitor, MessageSquare, Code2, Play, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 import { buildPreviewDocument, buildStandaloneBlob } from '../services/buildPreviewDocument';
-import type { FileSystem, ProjectMode } from '../types';
+import type { FileSystem, ProjectMode, PreviewError } from '../types';
 
 interface PreviewProps {
     // Single-file mode
@@ -12,6 +12,7 @@ interface PreviewProps {
     // Navigation
     activeTab?: 'chat' | 'code' | 'preview';
     onTabChange?: (tab: 'chat' | 'code' | 'preview') => void;
+    onTryToFix?: (error: PreviewError) => void;
 }
 
 const Preview: React.FC<PreviewProps> = ({
@@ -20,10 +21,12 @@ const Preview: React.FC<PreviewProps> = ({
     files = {},
     activeTab,
     onTabChange,
+    onTryToFix,
 }) => {
-    // ── Multi-page navigation state ─────────────────────────────────────────
+    // ── Multi-page navigation & Error state ─────────────────────────────────────────
     const [navHistory, setNavHistory] = useState<string[]>(['index.html']);
     const [historyIndex, setHistoryIndex] = useState(0);
+    const [runtimeError, setRuntimeError] = useState<PreviewError | null>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
     const currentPage = navHistory[historyIndex];
@@ -39,9 +42,18 @@ const Preview: React.FC<PreviewProps> = ({
         }
     }, [fileKeys, projectMode]);
 
+    // Clear error state when code or files change
+    useEffect(() => {
+        setRuntimeError(null);
+    }, [code, fileKeys, projectMode, currentPage]);
+
     // Listen for navigation messages from the iframe
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
+            if (event.data?.type === 'preview-error') {
+                setRuntimeError(event.data.error);
+                return;
+            }
             if (event.data?.type !== 'preview-navigate') return;
             const rawHref: string = event.data.href ?? '';
             if (!rawHref) return;
@@ -175,14 +187,39 @@ const Preview: React.FC<PreviewProps> = ({
             )}
 
             {/* ── iframe ── */}
-            <iframe
-                ref={iframeRef}
-                key={`${currentPage}::${safeSrcDoc.length}`}
-                srcDoc={safeSrcDoc}
-                title="Preview"
-                className="flex-1 w-full border-none bg-white"
-                sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"
-            />
+            <div className="flex-1 relative w-full h-full min-h-0 bg-white">
+                {runtimeError && onTryToFix && (
+                    <div className="absolute bottom-4 left-4 right-4 bg-red-900/95 backdrop-blur-sm text-white p-3 lg:p-4 rounded-xl shadow-2xl flex items-center justify-between z-50 animate-in slide-in-from-bottom border border-red-700/50">
+                        <div className="flex-1 min-w-0 pr-4">
+                            <h3 className="font-semibold text-sm mb-1 text-red-200 flex items-center gap-2">
+                                <span className="flex h-5 w-5 rounded-full bg-red-800/80 items-center justify-center text-xs">⚠️</span>
+                                Runtime Error
+                            </h3>
+                            <p className="text-xs font-mono opacity-90 truncate" title={runtimeError.message}>
+                                {runtimeError.message}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => {
+                                setRuntimeError(null);
+                                onTryToFix(runtimeError);
+                            }}
+                            className="flex-shrink-0 bg-white text-red-900 px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg text-xs lg:text-sm font-semibold hover:bg-red-50 transition-colors shadow-sm"
+                        >
+                            Try to Fix
+                        </button>
+                    </div>
+                )}
+                
+                <iframe
+                    ref={iframeRef}
+                    key={`${currentPage}::${safeSrcDoc.length}`}
+                    srcDoc={safeSrcDoc}
+                    title="Preview"
+                    className="w-full h-full border-none bg-white"
+                    sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"
+                />
+            </div>
         </div>
     );
 };

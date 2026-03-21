@@ -1,3 +1,5 @@
+import type { FirebaseConfig } from '../../types';
+
 /**
  * CODE IGNITE SYSTEM PROMPT
  * 
@@ -546,17 +548,17 @@ const Storage = {
         localStorage.clear();
     }
 };
-\\\`\\\`\\\`
+\`\`\`
 
 ### Firebase Integration (for real backends)
 
 **Setup:**
-\\\`\\\`\\\`html
+\`\`\`html
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-\\\`\\\`\\\`
+\`\`\`
 
 ### Uploaded Files Context
 
@@ -616,3 +618,65 @@ You are building REAL applications that users will actually use and share. Every
 
 Let's build something amazing! 🎨✨
 `.trim();
+
+// Add Firebase typing and addon generator
+export function buildFirebasePromptAddon(config: FirebaseConfig): string {
+    if (!config) return '';
+
+    return `
+### AUTOMATIC FIREBASE INTEGRATION ENABLED
+
+The user has securely connected their Firebase project. You MUST inject the following Firebase SDK setup into the \`index.html\` file and handle global database initialization.
+
+**1. Firebase SDK and Config**
+Inject this exactly BEFORE the closing \`</head>\` tag:
+\`\`\`html
+<!-- Firebase SDKs (Compat version for script tags) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+<script>
+  // Initialize Firebase
+  const firebaseConfig = {
+    apiKey: "${config.apiKey}",
+    authDomain: "${config.authDomain}",
+    databaseURL: "${config.databaseURL}",
+    projectId: "${config.projectId}",
+    storageBucket: "${config.storageBucket}",
+    messagingSenderId: "${config.messagingSenderId}",
+    appId: "${config.appId}"
+  };
+  
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const auth = firebase.auth();
+  
+  window.firebaseDb = db;
+  window.firebaseAuth = auth;
+
+  // Sign in anonymously immediately
+  auth.signInAnonymously().catch(error => {
+    console.error("Firebase Auth Error:", error);
+  });
+</script>
+\`\`\`
+
+**2. Database Usage Rules**
+- Use \`window.firebaseDb\` to access the Realtime Database.
+- MUST prefix ALL user data with their Auth UID to satisfy security rules. Example:
+  \`window.firebaseAuth.onAuthStateChanged(user => { if(user) { const ref = db.ref('users/' + user.uid + '/data'); ... } })\`
+- Handle Offline States: Always implement fallback logic (e.g. \`localStorage\`) or informative UI if Firebase fails to load/read.
+`;
+}
+
+export function getSystemPrompt(firebaseConfig?: FirebaseConfig | null): string {
+    let finalPrompt = SYSTEM_PROMPT;
+    
+    if (firebaseConfig) {
+        finalPrompt += '\n\n' + buildFirebasePromptAddon(firebaseConfig);
+    }
+    
+    return finalPrompt;
+}
+

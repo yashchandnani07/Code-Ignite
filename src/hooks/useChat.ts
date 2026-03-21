@@ -2,9 +2,10 @@ import { useState, useCallback, useEffect } from 'react';
 import { STORAGE_KEYS } from '../constants/storage';
 import { storage } from '../utils/storage';
 import { generateCodeStream } from '../services/ai';
+import { isMultiFileResponse, parseMultiFileResponse } from '../services/ai/parseMultiFile';
 import { formatApiError } from '../utils/errors';
 import { useToast } from '../components/Toast';
-import type { Message, FileAttachment, ChatState, ChatActions, ApiSettings, FileSystem } from '../types';
+import type { Message, FileAttachment, ChatState, ChatActions, ApiSettings, FileSystem, FirebaseConfig } from '../types';
 
 interface UseChatOptions {
     apiSettings: ApiSettings;
@@ -14,22 +15,22 @@ interface UseChatOptions {
     setPendingCode: (code: string | null) => void;
     pushToHistory: () => void;
     // Multi-file project actions (from useCodeEditor)
-    setProject: (files: FileSystem) => void;
-    updateFiles: (patches: FileSystem, deletions?: string[]) => void;
+    setProject: (files: FileSystem, isStreaming?: boolean) => void;
+    updateFiles: (patches: FileSystem, deletions?: string[], isStreaming?: boolean) => void;
     projectMode: 'single' | 'multi';
     /** Full virtual filesystem — passed to AI as context in multi-file mode */
     files: FileSystem;
+    firebaseConfig?: FirebaseConfig | null;
 }
 
 /**
  * Manages chat messages and AI code generation
  */
-export function useChat(options: UseChatOptions): ChatState & ChatActions {
+export function useChat({
+    apiSettings, code, isDefaultCode, setCode, setPendingCode,
+    pushToHistory, setProject, updateFiles, projectMode, files, firebaseConfig
+}: UseChatOptions): ChatState & ChatActions {
     const { showToast } = useToast();
-    const {
-        apiSettings, code, isDefaultCode, setCode, setPendingCode, pushToHistory,
-        setProject, updateFiles, projectMode,
-    } = options;
 
     // Load initial messages from storage once on mount
     const [messages, setMessages] = useState<Message[]>(() =>
@@ -103,15 +104,39 @@ export function useChat(options: UseChatOptions): ChatState & ChatActions {
                 code,
                 (chunk) => {
                     accumulatedCode += chunk;
-                    if (isDefaultCode) {
-                        setCode(accumulatedCode);
+                    if (isMultiFileResponse(accumulatedCode)) {
+                        const parsed = parseMultiFileResponse(accumulatedCode);
+                        if (Object.keys(parsed.files).length > 0) {
+                            if (projectMode !== 'multi') {
+                                setProject(parsed.files, true);
+                                // ensure the first parsed file is active immediately so user can watch it type
+                                const entry = parsed.files['index.html'] ? 'index.html' : Object.keys(parsed.files)[0];
+                                if (entry) {
+                                    // The active file will be shown immediately
+                                }
+                            } else {
+                                updateFiles(parsed.files, parsed.deletions, true);
+                            }
+                        }
+                    } else if (isDefaultCode && !accumulatedCode.includes('===')) {
+                        // Fallback: If it looks like a clean code block starting, we can try to stream it.
+                        // However, to keep it clean and prevent chatter, we only extract text inside ``` blocks.
+                        // If no blocks, we skip to avoid showing conversation.
+                        const matches = accumulatedCode.match(/```[a-z]*\n([\s\S]*?)($|```)/);
+                        if (matches && matches[1]) {
+                            setCode(matches[1]);
+                        } else {
+                            // If no code block, just stream the raw content for single file mode
+                            setCode(accumulatedCode);
+                        }
                     }
                 },
                 apiSettings.provider,
                 attachments,
                 apiSettings.baseUrl,
-                projectMode === 'multi' ? options.files : undefined,
+                projectMode === 'multi' ? files : undefined,
                 projectMode,
+                firebaseConfig
             );
 
             if (result.files && Object.keys(result.files).length > 0) {
@@ -176,7 +201,7 @@ export function useChat(options: UseChatOptions): ChatState & ChatActions {
         } finally {
             setIsLoading(false);
         }
-    }, [apiSettings, messages, code, isDefaultCode, setCode, setPendingCode, pushToHistory, setProject, updateFiles, projectMode, showToast, setMessages]);
+    }, [apiSettings, messages, code, isDefaultCode, setCode, setPendingCode, pushToHistory, setProject, updateFiles, projectMode, showToast, setMessages, files, firebaseConfig]);
 
 
     const retry = useCallback(() => {

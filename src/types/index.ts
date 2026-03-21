@@ -4,7 +4,7 @@
 
 export type ApiProvider =
     | 'Google AI'
-    | 'Openrouter'
+    | 'OpenRouter'
     | 'Openai'
     | 'Claude'
     | 'OpenAI-compatible';
@@ -33,11 +33,20 @@ export interface ModelOption {
 
 export interface FileAttachment {
     id: string;
+    file: File;
     name: string;
-    type: 'image' | 'pdf' | 'text';
-    content: string; // base64 for images/PDFs, plain text for text files
-    mimeType: string;
+    type: string;
     size: number;
+    content: string; // base64 for images/PDFs, plain text for text files
+    preview?: string;
+    mimeType: string;
+}
+
+export interface PreviewError {
+    message: string;
+    line?: number;
+    col?: number;
+    stack?: string;
 }
 
 // ============================================
@@ -50,6 +59,16 @@ export interface ApiSettings {
     model: string;
     githubToken: string;
     baseUrl: string;
+}
+
+export interface FirebaseConfig {
+    apiKey: string;
+    authDomain: string;
+    projectId: string;
+    databaseURL: string;
+    storageBucket: string;
+    messagingSenderId: string;
+    appId: string;
 }
 
 export interface EditorState {
@@ -95,8 +114,8 @@ export interface EditorActions {
     setPendingCode: (code: string | null) => void;
     pushToHistory: () => void;
     // Multi-file project actions
-    setProject: (files: FileSystem) => void;
-    updateFiles: (patches: FileSystem, deletions?: string[]) => void;
+    setProject: (files: FileSystem, isStreaming?: boolean) => void;
+    updateFiles: (patches: FileSystem, deletions?: string[], isStreaming?: boolean) => void;
     setActiveFile: (path: string) => void;
     setFileContent: (path: string, content: string) => void;
     addFile: (path: string, content?: string) => void;

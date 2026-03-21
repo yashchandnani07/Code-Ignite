@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Check, RefreshCw, Cpu, Key, GitBranch, Box } from 'lucide-react';
-import type { ApiProvider, ModelOption } from '../types';
+import { X, Check, RefreshCw, Cpu, Key, GitBranch, Box, Database } from 'lucide-react';
+import type { ApiProvider, ModelOption, FirebaseConfig } from '../types';
 import { AI_MODELS } from '../constants/models';
+import { FirebaseSetup } from './FirebaseSetup';
 import { validateApiKey } from '../services/aiValidate';
 import { fetchLatestModels } from '../services/fetchModels';
 
@@ -18,6 +19,8 @@ interface SettingsModalProps {
     setBaseUrl: (url: string) => void;
     onClose: () => void;
     onOpenSetup: () => void;
+    firebaseConfig: FirebaseConfig | null;
+    setFirebaseConfig: (config: FirebaseConfig | null) => void;
 }
 
 // Export for backward compatibility
@@ -25,7 +28,7 @@ export const AVAILABLE_MODELS = AI_MODELS;
 
 const PROVIDERS: ApiProvider[] = [
     'Google AI',
-    'Openrouter',
+    'OpenRouter',
     'Openai',
     'Claude',
     'OpenAI-compatible',
@@ -44,8 +47,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     setBaseUrl,
     onClose,
     onOpenSetup,
+    firebaseConfig,
+    setFirebaseConfig,
 }) => {
-    const [activeTab, setActiveTab] = useState<'provider' | 'model' | 'deploy'>('provider');
+    const [activeTab, setActiveTab] = useState<'provider' | 'model' | 'deploy' | 'database'>('provider');
+    const [showFirebaseSetup, setShowFirebaseSetup] = useState(false);
     const [keyStatus, setKeyStatus] = useState<'idle' | 'testing' | 'valid' | 'invalid'>('idle');
     const [keyError, setKeyError] = useState<string | null>(null);
 
@@ -72,7 +78,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         setModelsFromApi(false);
         // Fetch live list for providers that support it without needing a key
         // (OpenRouter is public). For others, only fetch if key is present.
-        const canAutoFetch = selectedProvider === 'Openrouter' || !!apiKey;
+        const canAutoFetch = selectedProvider === 'OpenRouter' || !!apiKey;
         if (canAutoFetch) {
             loadModels(selectedProvider, apiKey, baseUrl || undefined);
         }
@@ -177,6 +183,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                             <GitBranch className="w-4 h-4" />
                             Git Integration
                         </button>
+
+                        <button
+                            onClick={() => setActiveTab('database')}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${activeTab === 'database'
+                                ? 'bg-[#2b2d31] text-white'
+                                : 'text-[#949ba4] hover:bg-[#2b2d31]/50 hover:text-[#dbdee1]'
+                                }`}
+                        >
+                            <Database className="w-4 h-4" />
+                            Database Config
+                        </button>
                     </div>
                 </div>
 
@@ -189,11 +206,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                 {activeTab === 'provider' && 'AI Provider Settings'}
                                 {activeTab === 'model' && 'Model Configuration'}
                                 {activeTab === 'deploy' && 'Deployment & Git'}
+                                {activeTab === 'database' && 'Firebase Database Settings'}
                             </h3>
                             <p className="text-xs text-[#949ba4] mt-1">
                                 {activeTab === 'provider' && 'Configure secure API keys for your AI generation.'}
                                 {activeTab === 'model' && 'Select the specific AI model to power the code generation.'}
                                 {activeTab === 'deploy' && 'Set up GitHub access for one-click deployments.'}
+                                {activeTab === 'database' && 'Connect your Firebase project for real-time datastores.'}
                             </p>
                         </div>
                         <button onClick={onClose} className="p-2 text-[#949ba4] hover:text-white transition-colors rounded-md hover:bg-[#2b2d31]">
@@ -254,7 +273,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                         <p className="text-[11px] text-[#949ba4]">
                                             {selectedProvider === 'Google AI' ? (
                                                 <>Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-[#00a3ff] hover:underline">Google AI Studio</a></>
-                                            ) : selectedProvider === 'Openrouter' ? (
+                                            ) : selectedProvider === 'OpenRouter' ? (
                                                 <>Get your key from <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer" className="text-[#00a3ff] hover:underline">openrouter.ai</a></>
                                             ) : selectedProvider === 'Openai' ? (
                                                 <>Get your key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" className="text-[#00a3ff] hover:underline">OpenAI Dashboard</a></>
@@ -435,9 +454,70 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                 </div>
                             </div>
                         )}
+
+                        {/* DATABASE TAB */}
+                        {activeTab === 'database' && (
+                            <div className="space-y-6">
+                                <div className="space-y-3">
+                                    <label className="text-xs font-semibold text-[#b5bac1] uppercase tracking-wider">
+                                        Firebase Realtime Database
+                                    </label>
+                                    <p className="text-sm text-[#949ba4] leading-relaxed">
+                                        Connecting Firebase allows the AI to build full-stack apps that persist data automatically using your own database.
+                                    </p>
+                                    
+                                    {firebaseConfig?.projectId ? (
+                                        <div className="mt-4 p-4 rounded-lg bg-[#f6820c]/10 border border-[#f6820c]/20 flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-[#f6820c]/20 flex items-center justify-center">
+                                                    <Check className="w-5 h-5 text-[#f6820c]" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-white">Connected to Firebase</h4>
+                                                    <p className="text-xs text-[#949ba4]">Project ID: {firebaseConfig.projectId}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setShowFirebaseSetup(true)}
+                                                    className="px-3 py-1.5 rounded-md border border-[#2b2d31] text-xs font-medium text-white hover:bg-[#2b2d31] transition-colors"
+                                                >
+                                                    Change
+                                                </button>
+                                                <button
+                                                    onClick={() => setFirebaseConfig(null)}
+                                                    className="px-3 py-1.5 rounded-md border border-red-500/20 text-xs font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+                                                >
+                                                    Disconnect
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="pt-2">
+                                            <button
+                                                onClick={() => setShowFirebaseSetup(true)}
+                                                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-[#f6820c] hover:bg-[#ff952b] text-white font-medium transition-all"
+                                            >
+                                                <Database className="w-4 h-4" />
+                                                Connect Firebase Project
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
+
+            {/* Firebase Setup Overlay (renders on top of settings modal) */}
+            {showFirebaseSetup && (
+                <FirebaseSetup 
+                    firebaseConfig={firebaseConfig} 
+                    setFirebaseConfig={setFirebaseConfig} 
+                    onClose={() => setShowFirebaseSetup(false)} 
+                />
+            )}
         </>
     );
 };

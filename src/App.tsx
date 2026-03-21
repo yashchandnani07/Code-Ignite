@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Settings, Download, Home, Plus, RefreshCw, Copy, Check, Rocket, MessageSquare, Play, Archive } from 'lucide-react';
+import { Settings, Download, Home, Plus, RefreshCw, Copy, Check, Rocket, MessageSquare, Play, Archive, Database } from 'lucide-react';
+import type { PreviewError } from './types';
 
 // Components
 import CodeEditorComponent from './components/CodeEditor';
@@ -12,6 +13,7 @@ import DeployModal from './components/DeployModal';
 import FileTree from './components/FileTree';
 import { ToastProvider, useToast } from './components/Toast';
 import { ApiKeyPopup } from './components/ApiKeyPopup';
+import { FirebaseSetup } from './components/FirebaseSetup';
 
 // Custom Hooks
 import { useApiSettings } from './hooks/useApiSettings';
@@ -38,6 +40,7 @@ function AppContent() {
     updateFiles: editor.updateFiles,
     projectMode: editor.projectMode,
     files: editor.files,
+    firebaseConfig: apiSettings.firebaseConfig,
   });
 
   // UI-only state
@@ -45,6 +48,38 @@ function AppContent() {
   const [showFileTree, setShowFileTree] = useState(true);
   const [isPopupDismissed, setIsPopupDismissed] = useState(false);
   const [forceShowApiKeyPopup, setForceShowApiKeyPopup] = useState(false);
+  const [showFirebaseModal, setShowFirebaseModal] = useState(false);
+  const [fixAttemptCount, setFixAttemptCount] = useState(0);
+
+  const handleUserSendMessage = (message: string, attachments?: any[]) => {
+    setFixAttemptCount(0);
+    chat.sendMessage(message, attachments);
+  };
+
+  const handleTryToFix = (error: PreviewError) => {
+    if (fixAttemptCount >= 3) {
+      showToast("Maximum fix attempts reached. Please ask manually or check the console.", "error");
+      return;
+    }
+    const currentAttempt = fixAttemptCount + 1;
+    setFixAttemptCount(currentAttempt);
+    
+    let prompt = `The generated app threw the following error in the preview environment:
+
+Error Details:
+Message: ${error.message}
+${error.line ? `Line: ${error.line}` : ''}
+${error.stack ? `Stack Trace:\n${error.stack}` : ''}
+
+Please identify the root cause of this error and apply minimal, targeted fixes. Preserve working code and respect the original intent of the app. Return the updated files. Ensure the fix is robust and provide a short explanation of what you changed.`;
+
+    if (currentAttempt >= 3) {
+      prompt += `\n\nThis is the 3rd attempt to fix this issue. If it cannot be resolved safely, please stop trying to write code and instead provide a detailed explanation of the issue and what manual steps I should take.`;
+    }
+
+    navigation.setActiveTab('chat');
+    chat.sendMessage(prompt);
+  };
 
   // Toggle between single-file and multi-file mode
   const handleToggleMultiFile = () => {
@@ -161,6 +196,16 @@ function AppContent() {
             <Home className="h-4 w-4" />
             <span className="hidden sm:inline">Home</span>
           </button>
+          
+          <button
+            onClick={() => setShowFirebaseModal(true)}
+            className={`btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm ${apiSettings.hasFirebase ? 'text-[#f6820c] hover:text-[#ff952b]' : ''}`}
+            title="Database"
+          >
+            <Database className="h-4 w-4" />
+            <span className="hidden sm:inline">Database</span>
+          </button>
+          
           {/* Download Button — zip in multi-file mode, single HTML in single-file mode */}
           <button
             onClick={() => editor.projectMode === 'multi' ? editor.downloadProject() : editor.download()}
@@ -207,6 +252,8 @@ function AppContent() {
           setBaseUrl={apiSettings.setBaseUrl}
           onClose={navigation.closeSettings}
           onOpenSetup={() => setForceShowApiKeyPopup(true)}
+          firebaseConfig={apiSettings.firebaseConfig}
+          setFirebaseConfig={apiSettings.setFirebaseConfig}
         />
       )}
 
@@ -240,13 +287,22 @@ function AppContent() {
         />
       )}
 
+      {/* Firebase Setup Modal */}
+      {showFirebaseModal && (
+        <FirebaseSetup
+            firebaseConfig={apiSettings.firebaseConfig}
+            setFirebaseConfig={apiSettings.setFirebaseConfig}
+            onClose={() => setShowFirebaseModal(false)}
+        />
+      )}
+
       {/* Main Content */}
       <main className="flex flex-1 overflow-hidden p-4 gap-4 pb-20 lg:pb-4">
         {/* Left Panel - Chat */}
         <div className={`w-full lg:w-[400px] shrink-0 flex flex-col gap-4 ${navigation.activeTab === 'chat' ? 'flex' : 'hidden lg:flex'}`}>
           <ChatInterface
             messages={chat.messages}
-            onSendMessage={chat.sendMessage}
+            onSendMessage={handleUserSendMessage}
             isLoading={chat.isLoading}
             provider={apiSettings.settings.provider}
             selectedModel={apiSettings.settings.model}
@@ -301,6 +357,7 @@ function AppContent() {
               files={editor.files}
               activeTab={navigation.activeTab}
               onTabChange={navigation.setActiveTab}
+              onTryToFix={handleTryToFix}
             />
           </div>
         </div>

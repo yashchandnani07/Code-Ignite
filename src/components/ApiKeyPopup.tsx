@@ -5,11 +5,11 @@ import { cn } from '@/lib/utils';
 import { HoverBorderGradient } from './ui/hover-border-gradient';
 import type { ApiProvider } from '../types';
 
-const PROVIDERS: ApiProvider[] = ['Google AI', 'Openrouter', 'Openai', 'Claude', 'OpenAI-compatible'];
+const PROVIDERS: ApiProvider[] = ['Google AI', 'OpenRouter', 'Openai', 'Claude', 'OpenAI-compatible'];
 
 const apiKeyLinks: Record<string, string> = {
     "Google AI": "https://aistudio.google.com/app/apikey",
-    "Openrouter": "https://openrouter.ai/keys",
+    "OpenRouter": "https://openrouter.ai/keys",
     "Openai": "https://platform.openai.com/api-keys",
     "Claude": "https://platform.claude.com/dashboard",
     "OpenAI-compatible": "",
@@ -17,7 +17,7 @@ const apiKeyLinks: Record<string, string> = {
 
 const modelsByProvider: Record<string, string[]> = {
     "Google AI": ["gemini-2.0-flash-exp", "gemini-2.5-pro-preview", "gemini-1.5-pro"],
-    "Openrouter": ["google/gemini-2.0-flash-exp:free", "anthropic/claude-3.5-sonnet", "openai/gpt-4o"],
+    "OpenRouter": ["google/gemini-2.0-flash-exp:free", "anthropic/claude-3.5-sonnet", "openai/gpt-4o"],
     "Openai": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "o1-preview"],
     "Claude": ["claude-sonnet-4-5", "claude-3-5-sonnet-20241022", "claude-3-opus-20240229"],
     "OpenAI-compatible": [],

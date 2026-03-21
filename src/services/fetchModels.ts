@@ -113,7 +113,7 @@ export async function fetchLatestModels(
                 if (!apiKey) throw new Error('No API key');
                 models = await fetchGoogleModels(apiKey);
                 break;
-            case 'Openrouter':
+            case 'OpenRouter':
                 models = await fetchOpenRouterModels();
                 break;
             case 'Openai':

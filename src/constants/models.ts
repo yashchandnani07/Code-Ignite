@@ -22,7 +22,7 @@ export const AI_MODELS: Record<ApiProvider, ModelOption[]> = {
             description: 'Most capable Google model',
         },
     ],
-    Openrouter: [
+    OpenRouter: [
         {
             id: 'google/gemini-2.0-flash-exp:free',
             name: 'Gemini 2.0 Flash (via OpenRouter)',
@@ -75,5 +75,8 @@ export const AI_MODELS: Record<ApiProvider, ModelOption[]> = {
 /** Default provider — Google AI with user's own API key (BYOK) */
 export const DEFAULT_PROVIDER: ApiProvider = 'Google AI';
 
-export const getDefaultModel = (provider: ApiProvider): string =>
-    AI_MODELS[provider][0].id;
+export const getDefaultModel = (provider: ApiProvider | string): string => {
+    // Normalize in case of old localStorage values
+    const normalized = provider === 'Openrouter' ? 'OpenRouter' : provider as ApiProvider;
+    return AI_MODELS[normalized]?.[0]?.id || '';
+};
