@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import OpenAI from 'openai';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import Anthropic from '@anthropic-ai/sdk';
+import { OpenRouter } from '@openrouter/sdk';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -28,38 +30,44 @@ app.post('/api/ai/validate', async (req, res) => {
                 contents: [{ role: 'user', parts: [{ text: 'ping' }] }],
                 generationConfig: { maxOutputTokens: 5 },
             });
-        } else {
-            let baseURL;
-            switch (provider) {
-                case 'Openai':
-                case 'OpenAI':
-                    baseURL = 'https://api.openai.com/v1';
-                    break;
-                case 'Openrouter':
-                case 'OpenRouter':
-                    baseURL = 'https://openrouter.ai/api/v1';
-                    break;
-                case 'OpenAI-compatible':
-                    if (!baseUrl) {
-                        return res.status(400).json({
-                            valid: false,
-                            error: 'Base URL is required for OpenAI-compatible providers.',
-                        });
-                    }
-                    baseURL = baseUrl;
-                    break;
-                default:
-                    return res.status(400).json({
-                        valid: false,
-                        error: `Unsupported provider for validation: ${provider}`,
-                    });
+        } else if (provider === 'Claude') {
+            const client = new Anthropic({ apiKey });
+            await client.messages.create({
+                model,
+                max_tokens: 1,
+                messages: [{ role: 'user', content: 'ping' }],
+            });
+        } else if (provider === 'Openrouter' || provider === 'OpenRouter') {
+            const openrouter = new OpenRouter({ apiKey });
+            await openrouter.callModel({
+                model,
+                input: 'ping',
+                maxOutputTokens: 1,
+            });
+        } else if (provider === 'OpenAI-compatible') {
+            if (!baseUrl) {
+                return res.status(400).json({
+                    valid: false,
+                    error: 'Base URL is required for OpenAI-compatible providers.',
+                });
             }
-
-            const client = new OpenAI({ apiKey, baseURL });
+            const client = new OpenAI({ apiKey, baseURL: baseUrl });
+            await client.completions.create({
+                model,
+                prompt: 'ping',
+                max_tokens: 1,
+            });
+        } else if (provider === 'Openai' || provider === 'OpenAI') {
+            const client = new OpenAI({ apiKey, baseURL: 'https://api.openai.com/v1' });
             await client.chat.completions.create({
                 model,
                 max_tokens: 1,
                 messages: [{ role: 'user', content: 'ping' }],
+            });
+        } else {
+            return res.status(400).json({
+                valid: false,
+                error: `Unsupported provider for validation: ${provider}`,
             });
         }
 

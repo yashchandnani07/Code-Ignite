@@ -17,6 +17,7 @@
 
 import OpenAI from 'openai';
 import { GoogleGenerativeAI, type Part } from '@google/generative-ai';
+import Anthropic from '@anthropic-ai/sdk';
 import type { ApiProvider, FileAttachment, FileSystem } from '../types';
 import { SYSTEM_PROMPT } from './ai/system-prompt';
 import { isMultiFileResponse, parseMultiFileResponse } from './ai/parseMultiFile';
@@ -161,56 +162,26 @@ const generateWithClaude = async ({
 
     anthropicMessages.push({ role: 'user', content: finalContent });
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-            'content-type': 'application/json',
-            'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-            model,
-            max_tokens: 8192,
-            system: SYSTEM_PROMPT,
-            messages: anthropicMessages,
-            stream: true,
-        }),
+    const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+
+    const stream = await client.messages.create({
+        model: model,
+        max_tokens: 8192,
+        system: SYSTEM_PROMPT,
+        messages: anthropicMessages as any,
+        stream: true,
+    }).catch(err => {
+        const errorMsg = String((err as Error).message || err);
+        throw new Error(friendlyProviderError('Claude', 0, errorMsg));
     });
 
-    if (!response.ok) {
-        const errText = await response.text().catch(() => response.statusText);
-        throw new Error(friendlyProviderError('Claude', response.status, errText));
-    }
-
-    // Parse Anthropic SSE stream
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
     let fullContent = '';
-    let buffer = '';
 
-    if (!reader) throw new Error('No response stream from Anthropic');
-
-    while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-
-        for (const line of lines) {
-            if (!line.startsWith('data: ')) continue;
-            const data = line.slice(6).trim();
-            if (data === '[DONE]') continue;
-            try {
-                const parsed = JSON.parse(data);
-                if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
-                    const text: string = parsed.delta.text;
-                    fullContent += text;
-                    onChunk(text);
-                }
-            } catch { /* skip malformed events */ }
+    for await (const chunk of stream) {
+        if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+            const text = chunk.delta.text;
+            fullContent += text;
+            onChunk(text);
         }
     }
 
@@ -284,6 +255,42 @@ const generateWithOpenAICompatible = async (
 };
 
 // Concrete adapters
+// ============================================================
+// Custom OpenAI-compatible (completions endpoint) 
+// ============================================================
+const generateWithCustomOpenAI = async (
+    { apiKey, model, messages, currentCode, onChunk, files, projectMode }: ProviderArgs,
+    baseURL: string,
+): Promise<{ code: string; summary: string }> => {
+    
+    const openai = new OpenAI({ apiKey, baseURL, dangerouslyAllowBrowser: true });
+    
+    let textContext = buildUserPrompt(currentCode, files, projectMode);
+    
+    let fullPrompt = SYSTEM_PROMPT + '\n\n';
+    messages.forEach(m => fullPrompt += `${m.role}: ${m.content}\n`);
+    fullPrompt += '\n\n' + textContext;
+
+    const stream = await openai.completions.create({
+        model,
+        prompt: fullPrompt,
+        max_tokens: 8192,
+        stream: true,
+    }).catch(async (err) => {
+        const status = err?.status ?? 0;
+        const msg = err?.message ?? String(err);
+        throw new Error(friendlyProviderError(baseURL, status, msg));
+    });
+
+    let fullContent = '';
+    for await (const chunk of stream) {
+        const text = chunk.choices[0]?.text || '';
+        if (text) { fullContent += text; onChunk(text); }
+    }
+
+    return processResponse(fullContent);
+};
+
 const generateWithOpenRouter = (args: ProviderArgs) =>
     generateWithOpenAICompatible(args, 'https://openrouter.ai/api/v1');
 
@@ -382,7 +389,7 @@ export const generateCodeStream = async (
                 if (!baseUrlOverride) {
                     throw new Error('Base URL is required for OpenAI-compatible providers. Set it in Settings.');
                 }
-                raw = await generateWithOpenAICompatible(args, baseUrlOverride);
+                raw = await generateWithCustomOpenAI(args, baseUrlOverride);
                 break;
             case 'Openrouter':
             default:
