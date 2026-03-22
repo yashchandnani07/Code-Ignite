@@ -217,7 +217,7 @@ const Preview: React.FC<PreviewProps> = ({
                     srcDoc={safeSrcDoc}
                     title="Preview"
                     className="w-full h-full border-none bg-white"
-                    sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"
+                    sandbox="allow-scripts allow-modals allow-forms allow-popups"
                 />
             </div>
         </div>

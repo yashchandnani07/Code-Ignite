@@ -50,6 +50,7 @@
 ### 🔄 Smart Change Management
 - **Visual Diff Viewer** - Character-level comparison of AI-generated updates.
 - **Apply/Reject Changes** - Semantic control over every modification the AI proposes.
+- **Auto-Fix Errors** - Encountered a bug? Just hit "Try to Fix" and the AI will analyze the error stack and automatically generate a patch for your code.
 
 ---
 
