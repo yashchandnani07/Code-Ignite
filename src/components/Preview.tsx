@@ -13,6 +13,7 @@ interface PreviewProps {
     activeTab?: 'chat' | 'code' | 'preview';
     onTabChange?: (tab: 'chat' | 'code' | 'preview') => void;
     onTryToFix?: (error: PreviewError) => void;
+    isLoading?: boolean;
 }
 
 const Preview: React.FC<PreviewProps> = ({
@@ -22,6 +23,7 @@ const Preview: React.FC<PreviewProps> = ({
     activeTab,
     onTabChange,
     onTryToFix,
+    isLoading = false,
 }) => {
     // ── Multi-page navigation & Error state ─────────────────────────────────────────
     const [navHistory, setNavHistory] = useState<string[]>(['index.html']);
@@ -51,7 +53,9 @@ const Preview: React.FC<PreviewProps> = ({
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
             if (event.data?.type === 'preview-error') {
-                setRuntimeError(event.data.error);
+                if (!isLoading) {
+                    setRuntimeError(event.data.error);
+                }
                 return;
             }
             if (event.data?.type !== 'preview-navigate') return;
@@ -83,7 +87,7 @@ const Preview: React.FC<PreviewProps> = ({
 
         window.addEventListener('message', handleMessage);
         return () => window.removeEventListener('message', handleMessage);
-    }, [currentPage, historyIndex, files]);
+    }, [currentPage, historyIndex, files, isLoading]);
 
     // Navigation controls
     const goBack = () => { if (canGoBack) setHistoryIndex(i => i - 1); };
@@ -188,7 +192,7 @@ const Preview: React.FC<PreviewProps> = ({
 
             {/* ── iframe ── */}
             <div className="flex-1 relative w-full h-full min-h-0 bg-white">
-                {runtimeError && onTryToFix && (
+                {runtimeError && onTryToFix && !isLoading && (
                     <div className="absolute bottom-4 left-4 right-4 bg-red-900/95 backdrop-blur-sm text-white p-3 lg:p-4 rounded-xl shadow-2xl flex items-center justify-between z-50 animate-in slide-in-from-bottom border border-red-700/50">
                         <div className="flex-1 min-w-0 pr-4">
                             <h3 className="font-semibold text-sm mb-1 text-red-200 flex items-center gap-2">

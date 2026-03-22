@@ -358,6 +358,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
               activeTab={navigation.activeTab}
               onTabChange={navigation.setActiveTab}
               onTryToFix={handleTryToFix}
+              isLoading={chat.isLoading}
             />
           </div>
         </div>
