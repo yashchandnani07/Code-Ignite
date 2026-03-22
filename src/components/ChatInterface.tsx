@@ -125,7 +125,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     };
 
     const models = AI_MODELS[provider] || [];
-    const activeModel = models.find(m => m.id === selectedModel) || models[0];
+    const activeModel = models.find(m => m.id === selectedModel) || { id: selectedModel || '', name: selectedModel || 'Custom', description: 'Custom Model' };
 
     return (
         <div className="flex h-full flex-col card overflow-hidden">

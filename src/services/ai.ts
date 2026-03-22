@@ -163,7 +163,7 @@ const generateWithClaude = async ({
 
     anthropicMessages.push({ role: 'user', content: finalContent });
 
-    const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+    const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true, maxRetries: 0 });
 
     const stream = await client.messages.create({
         model: model,
@@ -199,7 +199,7 @@ const generateWithOpenAICompatible = async (
     baseURL: string,
 ): Promise<{ code: string; summary: string }> => {
 
-    const openai = new OpenAI({ apiKey, baseURL, dangerouslyAllowBrowser: true });
+    const openai = new OpenAI({ apiKey, baseURL, dangerouslyAllowBrowser: true, maxRetries: 0 });
 
     const userPromptText = buildUserPrompt(currentCode, files, projectMode);
 
@@ -264,7 +264,7 @@ const generateWithCustomOpenAI = async (
     baseURL: string,
 ): Promise<{ code: string; summary: string }> => {
     
-    const openai = new OpenAI({ apiKey, baseURL, dangerouslyAllowBrowser: true });
+    const openai = new OpenAI({ apiKey, baseURL, dangerouslyAllowBrowser: true, maxRetries: 0 });
     
     let textContext = buildUserPrompt(currentCode, files, projectMode);
     

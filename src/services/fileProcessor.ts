@@ -27,6 +27,7 @@ export async function processFile(file: File): Promise<FileAttachment> {
 
     return {
         id,
+        file,
         name: file.name,
         type,
         content,

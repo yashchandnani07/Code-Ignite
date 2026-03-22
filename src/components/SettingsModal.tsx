@@ -93,17 +93,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         setKeyError(null);
     };
 
-    // When models load, keep the selected model if still in list; else pick first
+    // When models load from the network, we no longer aggressively reset the selectedModel.
+    // If it's a custom model string or simply not in the live list anymore, we preserve it.
+    // The provider change handler already resets the model safely.
     useEffect(() => {
         if (!models.length) return;
-        const ids = models.map(m => m.id);
-        if (!ids.includes(selectedModel)) {
-            // If the current selectedModel is a custom value not in the list, keep it
-            if (customModelInput && selectedModel === customModelInput) return;
-            setSelectedModel(models[0].id);
+        
+        // If the user has explicitly typed a custom model that they want to apply right now:
+        if (customModelInput && customExpanded) {
+           // We keep the input field synchronized, but don't force a reset of selectedModel.
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [models]);
+    }, [models, customModelInput, customExpanded]);
 
     const applyCustomModel = () => {
         const trimmed = customModelInput.trim();
