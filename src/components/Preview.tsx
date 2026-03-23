@@ -29,7 +29,29 @@ const Preview: React.FC<PreviewProps> = ({
     const [navHistory, setNavHistory] = useState<string[]>(['index.html']);
     const [historyIndex, setHistoryIndex] = useState(0);
     const [runtimeError, setRuntimeError] = useState<PreviewError | null>(null);
+    const [settled, setSettled] = useState(true); // becomes false during streaming, true 1.5s after
     const iframeRef = useRef<HTMLIFrameElement>(null);
+    const isLoadingRef = useRef(isLoading);           // always-current ref; avoids stale closures
+    const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Keep the ref in sync with the prop
+    useEffect(() => {
+        isLoadingRef.current = isLoading;
+        if (isLoading) {
+            // Reset settled immediately when a new generation begins
+            if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+            setSettled(false);
+            setRuntimeError(null);
+        } else {
+            // After generation ends, wait 1.5 s before accepting errors from the iframe.
+            // This absorbs any errors fired by the final iframe re-mount.
+            settleTimerRef.current = setTimeout(() => setSettled(true), 1500);
+        }
+        return () => {
+            if (settleTimerRef.current) clearTimeout(settleTimerRef.current);
+        };
+    }, [isLoading]);
+
 
     const currentPage = navHistory[historyIndex];
     const canGoBack = historyIndex > 0;
@@ -49,11 +71,12 @@ const Preview: React.FC<PreviewProps> = ({
         setRuntimeError(null);
     }, [code, fileKeys, projectMode, currentPage]);
 
-    // Listen for navigation messages from the iframe
+    // Listen for navigation and error messages from the iframe
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
             if (event.data?.type === 'preview-error') {
-                if (!isLoading) {
+                // Use the ref (not the closed-over prop) so we always read the live value
+                if (!isLoadingRef.current) {
                     setRuntimeError(event.data.error);
                 }
                 return;
@@ -87,15 +110,19 @@ const Preview: React.FC<PreviewProps> = ({
 
         window.addEventListener('message', handleMessage);
         return () => window.removeEventListener('message', handleMessage);
-    }, [currentPage, historyIndex, files, isLoading]);
+        // NOTE: isLoading intentionally NOT in deps — we read it via ref instead
+    }, [currentPage, historyIndex, files]);
 
     // Navigation controls
     const goBack = () => { if (canGoBack) setHistoryIndex(i => i - 1); };
     const goForward = () => { if (canGoForward) setHistoryIndex(i => i + 1); };
     const reload = () => setNavHistory(h => [...h]); // force re-render
 
-    // ── Build srcdoc ────────────────────────────────────────────────────────
-    const safeSrcDoc = useMemo(() => {
+    // ── Build srcdoc with Debounce for Streaming ───────────────────────────
+    const [debouncedSrcDoc, setDebouncedSrcDoc] = useState('');
+    const streamingDebounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const rawSrcDoc = useMemo(() => {
         if (projectMode === 'multi') {
             if (Object.keys(files).length === 0) return emptyDoc();
             return buildPreviewDocument(files, currentPage);
@@ -103,6 +130,24 @@ const Preview: React.FC<PreviewProps> = ({
         if (!code?.trim()) return emptyDoc();
         return code;
     }, [projectMode, files, currentPage, code]);
+
+    useEffect(() => {
+        if (!isLoading) {
+            // Immediate update when not generating
+            if (streamingDebounceTimer.current) clearTimeout(streamingDebounceTimer.current);
+            setDebouncedSrcDoc(rawSrcDoc);
+        } else {
+            // Debounce updates during streaming to prevent jitter and constant syntax errors
+            if (streamingDebounceTimer.current) clearTimeout(streamingDebounceTimer.current);
+            streamingDebounceTimer.current = setTimeout(() => {
+                setDebouncedSrcDoc(rawSrcDoc);
+            }, 500); // 500ms debounce during generation
+        }
+        return () => {
+            if (streamingDebounceTimer.current) clearTimeout(streamingDebounceTimer.current);
+        };
+    }, [rawSrcDoc, isLoading]);
+
 
     // ── Open in new tab ─────────────────────────────────────────────────────
     const handleOpenInNewTab = useCallback(() => {
@@ -192,7 +237,7 @@ const Preview: React.FC<PreviewProps> = ({
 
             {/* ── iframe ── */}
             <div className="flex-1 relative w-full h-full min-h-0 bg-white">
-                {runtimeError && onTryToFix && !isLoading && (
+                {runtimeError && onTryToFix && !isLoading && settled && (
                     <div className="absolute bottom-4 left-4 right-4 bg-red-900/95 backdrop-blur-sm text-white p-3 lg:p-4 rounded-xl shadow-2xl flex items-center justify-between z-50 animate-in slide-in-from-bottom border border-red-700/50">
                         <div className="flex-1 min-w-0 pr-4">
                             <h3 className="font-semibold text-sm mb-1 text-red-200 flex items-center gap-2">
@@ -217,11 +262,11 @@ const Preview: React.FC<PreviewProps> = ({
                 
                 <iframe
                     ref={iframeRef}
-                    key={`${currentPage}::${safeSrcDoc.length}`}
-                    srcDoc={safeSrcDoc}
+                    key={currentPage} // Only remount when navigating to different pages, NOT on content changes
+                    srcDoc={debouncedSrcDoc}
                     title="Preview"
                     className="w-full h-full border-none bg-white"
-                    sandbox="allow-scripts allow-modals allow-forms allow-popups"
+                    sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"
                 />
             </div>
         </div>
