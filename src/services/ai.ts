@@ -260,21 +260,56 @@ const generateWithOpenAICompatible = async (
 // Custom OpenAI-compatible (completions endpoint) 
 // ============================================================
 const generateWithCustomOpenAI = async (
-    { apiKey, model, messages, currentCode, onChunk, files, projectMode, firebaseConfig }: ProviderArgs,
+    { apiKey, model, messages, currentCode, onChunk, attachments, files, projectMode, firebaseConfig }: ProviderArgs,
     baseURL: string,
 ): Promise<{ code: string; summary: string }> => {
     
-    const openai = new OpenAI({ apiKey, baseURL, dangerouslyAllowBrowser: true, maxRetries: 0 });
+    const proxyBase = `${window.location.origin}/api/proxy`;
+    const openai = new OpenAI({ 
+        apiKey, 
+        baseURL: proxyBase, 
+        defaultHeaders: { 'x-target-url': baseURL },
+        dangerouslyAllowBrowser: true, 
+        maxRetries: 0 
+    });
     
-    let textContext = buildUserPrompt(currentCode, files, projectMode);
-    
-    let fullPrompt = getSystemPrompt(firebaseConfig) + '\n\n';
-    messages.forEach(m => fullPrompt += `${m.role}: ${m.content}\n`);
-    fullPrompt += '\n\n' + textContext;
+    const userPromptText = buildUserPrompt(currentCode, files, projectMode);
 
-    const stream = await openai.completions.create({
+    const imageAttachments = attachments?.filter(a => a.type === 'image') ?? [];
+    const textAttachments = attachments?.filter(a => a.type !== 'image') ?? [];
+
+    let textContext = userPromptText;
+    for (const att of textAttachments) {
+        if (att.type === 'text') {
+            textContext += `\n\n--- Attached File: ${att.name} ---\n${att.content}\n--- End of File ---\n`;
+        } else if (att.type === 'pdf') {
+            textContext += `\n\n[PDF attached: ${att.name}] — PDF binary content not available for this provider.`;
+        }
+    }
+
+    type OAIContent =
+        | { type: 'text'; text: string }
+        | { type: 'image_url'; image_url: { url: string; detail?: 'auto' | 'low' | 'high' } };
+
+    let lastUserContent: string | OAIContent[];
+
+    if (imageAttachments.length > 0) {
+        const parts: OAIContent[] = [{ type: 'text', text: textContext }];
+        for (const att of imageAttachments) {
+            parts.push({ type: 'image_url', image_url: { url: att.content, detail: 'auto' } });
+        }
+        lastUserContent = parts;
+    } else {
+        lastUserContent = textContext;
+    }
+
+    const stream = await openai.chat.completions.create({
         model,
-        prompt: fullPrompt,
+        messages: [
+            { role: 'system', content: getSystemPrompt(firebaseConfig) },
+            ...messages.map(m => ({ role: m.role, content: m.content })),
+            { role: 'user', content: lastUserContent as string },
+        ],
         max_tokens: 8192,
         stream: true,
     }).catch(async (err) => {
@@ -285,7 +320,7 @@ const generateWithCustomOpenAI = async (
 
     let fullContent = '';
     for await (const chunk of stream) {
-        const text = chunk.choices[0]?.text || '';
+        const text = chunk.choices[0]?.delta?.content || '';
         if (text) { fullContent += text; onChunk(text); }
     }
 

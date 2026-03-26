@@ -80,13 +80,21 @@ const CLAUDE_MODELS: ModelOption[] = [
 
 // ── OpenAI-compatible — use baseUrl + /models ─────────────────────────────────
 async function fetchCompatibleModels(apiKey: string, baseUrl: string): Promise<ModelOption[]> {
-    const url = baseUrl.replace(/\/$/, '') + '/models';
-    const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${apiKey}` },
+    const targetUrl = baseUrl.replace(/\/$/, '') + '/models';
+    const proxyUrl = `${window.location.origin}/api/proxy`;
+    const res = await fetch(proxyUrl, {
+        headers: { 
+            Authorization: `Bearer ${apiKey}`,
+            'x-target-url': targetUrl,
+        },
     });
     if (!res.ok) throw new Error('OpenAI-compatible models fetch failed');
     const data = await res.json() as { data?: { id: string }[] };
-    return (data.data ?? []).map(m => ({ id: m.id, name: m.id, description: '' }));
+    const rawModels = (data.data ?? []).map(m => ({ id: m.id, name: m.id, description: '' }));
+    
+    // Some providers (like NVIDIA) might return duplicate entries. Deduplicate by ID.
+    const uniqueModels = Array.from(new Map(rawModels.map(m => [m.id, m])).values());
+    return uniqueModels;
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────────

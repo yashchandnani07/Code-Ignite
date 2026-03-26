@@ -5,6 +5,8 @@ import expressApp from '../api/deploy.js';
 import sttApp from '../api/stt.js';
 // @ts-ignore
 import validateAiApp from '../api/ai-validate.js';
+// @ts-ignore
+import proxyApp from '../api/proxy.js';
 
 export function expressDevServerPlugin(): Plugin {
     return {
@@ -13,6 +15,7 @@ export function expressDevServerPlugin(): Plugin {
             server.middlewares.use(expressApp);
             server.middlewares.use(sttApp);
             server.middlewares.use(validateAiApp);
+            server.middlewares.use(proxyApp);
         }
     }
 }

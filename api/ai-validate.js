@@ -52,9 +52,9 @@ app.post('/api/ai/validate', async (req, res) => {
                 });
             }
             const client = new OpenAI({ apiKey, baseURL: baseUrl });
-            await client.completions.create({
+            await client.chat.completions.create({
                 model,
-                prompt: 'ping',
+                messages: [{ role: 'user', content: 'ping' }],
                 max_tokens: 1,
             });
         } else if (provider === 'Openai' || provider === 'OpenAI') {
