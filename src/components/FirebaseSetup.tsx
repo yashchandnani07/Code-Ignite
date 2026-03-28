@@ -170,15 +170,41 @@ export const FirebaseSetup: React.FC<FirebaseSetupProps> = ({
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            {/* Setup Instructions */}
-                            <div className="space-y-3 bg-[#2b2d31]/30 p-4 rounded-lg border border-[#2b2d31]/50">
-                                <h4 className="text-sm font-medium text-white">How to setup:</h4>
-                                <ol className="text-sm text-[#949ba4] space-y-2 list-decimal list-inside">
-                                    <li>Go to <a href="https://console.firebase.google.com" target="_blank" rel="noreferrer" className="text-[#00a3ff] hover:underline">Firebase Console</a> and create a project</li>
-                                    <li>Click <strong>Build → Realtime Database</strong> and create database</li>
-                                    <li>Click <strong>Build → Authentication → Sign-in method</strong> and enable <strong>Anonymous</strong></li>
-                                    <li>Go back to Project Settings, add a Web App, and copy the config snippet below.</li>
-                                </ol>
+                            <div className="space-y-4 bg-[#2b2d31]/30 p-5 rounded-lg border border-[#2b2d31]/50 custom-scrollbar overflow-y-auto max-h-[300px]">
+                                <h4 className="text-sm font-semibold text-white flex items-center gap-2">
+                                    <Database className="w-4 h-4 text-[#f6820c]" />
+                                    Setup Instructions
+                                </h4>
+                                
+                                <div className="space-y-4 text-xs text-[#949ba4]">
+                                    <section className="space-y-2">
+                                        <h5 className="font-bold text-[#f6820c] uppercase tracking-wider">1. Enable Realtime Database</h5>
+                                        <ul className="list-disc list-inside space-y-1 ml-1">
+                                            <li>Go to <a href="https://console.firebase.google.com" target="_blank" rel="noreferrer" className="text-[#00a3ff] hover:underline inline-flex items-center gap-0.5">Firebase Console</a> and create/select a project.</li>
+                                            <li>On the left sidebar, click <strong>Build</strong> (hammer icon) and select <strong>Realtime Database</strong>.</li>
+                                            <li>Click <strong>Create Database</strong>, choose a location, and start in <strong>Test Mode</strong> (for dev).</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="space-y-2 border-t border-[#2b2d31] pt-3">
+                                        <h5 className="font-bold text-[#f6820c] uppercase tracking-wider">2. Enable Authentication</h5>
+                                        <ul className="list-disc list-inside space-y-1 ml-1">
+                                            <li>In the <strong>Build</strong> menu, click <strong>Authentication</strong>.</li>
+                                            <li>Go to the <strong>Sign-in method</strong> tab.</li>
+                                            <li>Enable <strong>Anonymous</strong> and <strong>Google</strong> providers from the list and click Save.</li>
+                                        </ul>
+                                    </section>
+
+                                    <section className="space-y-2 border-t border-[#2b2d31] pt-3">
+                                        <h5 className="font-bold text-[#f6820c] uppercase tracking-wider">3. Add Web App & Config</h5>
+                                        <ul className="list-disc list-inside space-y-1 ml-1">
+                                            <li>Go to <strong>Project Settings</strong> (gear icon).</li>
+                                            <li>Under <strong>Your apps</strong>, click the Web icon (<strong>&lt;/&gt;</strong>).</li>
+                                            <li>Register the app, then copy the <code>const firebaseConfig = {'{ ... }'};</code> block.</li>
+                                            <li>Paste that entire code block into the area below.</li>
+                                        </ul>
+                                    </section>
+                                </div>
                             </div>
                             
                             {/* Paste Area */}
