@@ -106,7 +106,11 @@ app.post('/api/deploy', async (req, res) => {
             });
 
             if (!siteResponse.ok) {
-                throw new Error(`Netlify Error (Create Site): ${await siteResponse.text()}`);
+                const errText = await siteResponse.text();
+                if (siteResponse.status === 401) {
+                    throw new Error('Netlify token is invalid or expired. Please create a new Personal Access Token at app.netlify.com/user/applications and update it in the Deploy modal or your .env file.');
+                }
+                throw new Error(`Netlify Error (Create Site): ${errText}`);
             }
             const siteData = await siteResponse.json();
             siteId = siteData.id;

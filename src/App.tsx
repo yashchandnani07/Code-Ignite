@@ -128,7 +128,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
             <h1 className="font-semibold text-base tracking-tight hidden sm:block">
               Code Ignite
             </h1>
-            <span className="text-[10px] text-[hsl(var(--muted-foreground))] hidden sm:block">by Yash Chandnani</span>
+            <span className="text-[10px] text-[hsl(var(--muted-foreground))] hidden sm:block"> </span>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -299,7 +299,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
       {/* Main Content */}
       <main className="flex flex-1 overflow-hidden p-4 gap-4 pb-20 lg:pb-4">
         {/* Left Panel - Chat */}
-        <div className={`w-full lg:w-[400px] shrink-0 flex flex-col gap-4 ${navigation.activeTab === 'chat' ? 'flex' : 'hidden lg:flex'}`}>
+        <div className={`w-full lg:w-[400px] shrink-0 flex-col gap-4 ${navigation.activeTab === 'chat' ? 'flex' : 'hidden lg:flex'}`}>
           <ChatInterface
             messages={chat.messages}
             onSendMessage={handleUserSendMessage}
@@ -311,8 +311,8 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
         </div>
 
         {/* Right Panel — Editor (with optional FileTree) & Preview */}
-        <div className={`flex-1 flex flex-col lg:flex-row gap-4 min-w-0 ${navigation.activeTab !== 'chat' ? 'flex' : 'hidden lg:flex'}`}>
-          <div className={`flex-1 overflow-hidden rounded-xl glass shadow-2xl flex ${navigation.activeTab === 'code' ? 'flex' : 'hidden lg:flex'}`}>
+        <div className={`flex-1 flex-col lg:flex-row gap-4 min-w-0 ${navigation.activeTab !== 'chat' ? 'flex' : 'hidden lg:flex'}`}>
+          <div className={`flex-1 overflow-hidden rounded-xl glass shadow-2xl ${navigation.activeTab === 'code' ? 'flex' : 'hidden lg:flex'}`}>
             {/* FileTree sidebar — visible when multi-file mode is active AND showFileTree is true */}
             {editor.projectMode === 'multi' && showFileTree && (
               <div className="w-52 flex-shrink-0 overflow-hidden border-r border-[hsl(var(--border))]">

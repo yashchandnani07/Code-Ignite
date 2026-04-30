@@ -7,9 +7,14 @@ import type { ApiProvider, ModelOption } from '../types';
 export const AI_MODELS: Record<ApiProvider, ModelOption[]> = {
     'Google AI': [
         {
+            id: 'gemini-2.5-flash-lite',
+            name: 'Gemini 2.5 Flash Lite',
+            description: 'Ultra-fast and efficient',
+        },
+        {
             id: 'gemini-3-flash-preview',
             name: 'Gemini 3 Flash (Preview)',
-            description: 'Latest Gemini 3 — default',
+            description: 'Latest Gemini 3',
         },
         {
             id: 'gemini-2.0-flash',
@@ -41,13 +46,13 @@ export const AI_MODELS: Record<ApiProvider, ModelOption[]> = {
     ],
     Openai: [
         {
-            id: 'gpt-4.1-mini',
-            name: 'GPT-4.1 Mini',
+            id: 'gpt-5-codex',
+            name: 'GPT-5 Codex',
             description: 'Fast, cost-effective general model',
         },
         {
-            id: 'gpt-4.1',
-            name: 'GPT-4.1',
+            id: 'gpt-5-mini',
+            name: 'GPT-5 Mini',
             description: 'Flagship OpenAI model',
         },
     ],
