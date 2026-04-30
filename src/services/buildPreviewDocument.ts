@@ -32,6 +32,10 @@ export function buildStandaloneBlob(
     return compileDocument(files, entryPoint, 'blob');
 }
 
+export function instrumentPreviewDocument(html: string): string {
+    return injectIframeBridge(html);
+}
+
 type CompileMode = 'iframe' | 'blob';
 
 function compileDocument(
@@ -102,29 +106,9 @@ function compileDocument(
         }
     );
 
-    // --- 3. Inject Error Reporter (for iframe mode only) ---
+    // --- 3. Inject preview bridge (for iframe mode only) ---
     if (mode === 'iframe') {
-        const errorReporter = `
-<script>
-window.onerror = function(msg, url, line, col, error) {
-    window.parent.postMessage({ type: 'preview-error', error: { message: msg, line: line, col: col, stack: error ? error.stack : undefined } }, '*');
-};
-window.addEventListener('unhandledrejection', function(event) {
-    window.parent.postMessage({ type: 'preview-error', error: { message: event.reason ? (event.reason.message || event.reason) : 'Unhandled Rejection', stack: event.reason ? event.reason.stack : undefined } }, '*');
-});
-const __originalConsoleError = console.error;
-console.error = function(...args) {
-    window.parent.postMessage({ type: 'preview-error', error: { message: args.join(' ') } }, '*');
-    __originalConsoleError.apply(console, args);
-};
-</script>`;
-        if (/<head>/i.test(html)) {
-            html = html.replace(/<head>/i, `<head>\n${errorReporter}`);
-        } else if (/<html>/i.test(html)) {
-            html = html.replace(/<html>/i, `<html>\n<head>${errorReporter}</head>`);
-        } else {
-            html = errorReporter + '\n' + html;
-        }
+        html = injectIframeBridge(html);
     }
 
     // --- 4. Inject Blob Router (for blob mode only) ---
@@ -273,6 +257,60 @@ function findCaseInsensitive(files: FileSystem, path: string): string | null {
 
 function isExternal(url: string): boolean {
     return /^(https?:|\/\/|data:|blob:|mailto:|tel:)/i.test(url);
+}
+
+function injectIframeBridge(html: string): string {
+    const bridgeScript = `
+<script>
+(function() {
+    var postToParent = function(payload) {
+        window.parent.postMessage(payload, '*');
+    };
+
+    window.onerror = function(msg, url, line, col, error) {
+        postToParent({
+            type: 'preview-error',
+            error: {
+                message: String(msg),
+                line: typeof line === 'number' ? line : undefined,
+                col: typeof col === 'number' ? col : undefined,
+                stack: error ? error.stack : undefined
+            }
+        });
+    };
+
+    window.addEventListener('unhandledrejection', function(event) {
+        var reason = event.reason;
+        postToParent({
+            type: 'preview-error',
+            error: {
+                message: reason ? String(reason.message || reason) : 'Unhandled Rejection',
+                stack: reason && typeof reason === 'object' ? reason.stack : undefined
+            }
+        });
+    });
+
+    var originalConsoleError = console.error;
+    console.error = function() {
+        var args = Array.prototype.slice.call(arguments);
+        postToParent({
+            type: 'preview-error',
+            error: {
+                message: args.map(function(arg) { return typeof arg === 'string' ? arg : String(arg); }).join(' ')
+            }
+        });
+        originalConsoleError.apply(console, args);
+    };
+})();
+</script>`;
+
+    if (/<head>/i.test(html)) {
+        return html.replace(/<head>/i, `<head>\n${bridgeScript}`);
+    }
+    if (/<html>/i.test(html)) {
+        return html.replace(/<html>/i, `<html>\n<head>${bridgeScript}</head>`);
+    }
+    return bridgeScript + '\n' + html;
 }
 
 function buildErrorDocument(message: string): string {

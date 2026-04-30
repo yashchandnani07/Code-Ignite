@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from 'react';
 import { ExternalLink, Monitor, MessageSquare, Code2, Play, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
-import { buildPreviewDocument, buildStandaloneBlob } from '../services/buildPreviewDocument';
+import { buildPreviewDocument, buildStandaloneBlob, instrumentPreviewDocument } from '../services/buildPreviewDocument';
 import type { FileSystem, ProjectMode, PreviewError } from '../types';
 
 interface PreviewProps {
@@ -74,16 +74,18 @@ const Preview: React.FC<PreviewProps> = ({
     // Listen for navigation and error messages from the iframe
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
-            if (event.data?.type === 'preview-error') {
+            const iframeWindow = iframeRef.current?.contentWindow;
+            if (!iframeWindow || event.source !== iframeWindow) return;
+
+            if (isPreviewErrorMessage(event.data)) {
                 // Use the ref (not the closed-over prop) so we always read the live value
                 if (!isLoadingRef.current) {
                     setRuntimeError(event.data.error);
                 }
                 return;
             }
-            if (event.data?.type !== 'preview-navigate') return;
-            const rawHref: string = event.data.href ?? '';
-            if (!rawHref) return;
+            if (!isPreviewNavigateMessage(event.data)) return;
+            const rawHref = event.data.href;
 
             // Resolve path relative to current page's directory
             const currentDir = currentPage.includes('/')
@@ -128,7 +130,7 @@ const Preview: React.FC<PreviewProps> = ({
             return buildPreviewDocument(files, currentPage);
         }
         if (!code?.trim()) return emptyDoc();
-        return code;
+        return instrumentPreviewDocument(code);
     }, [projectMode, files, currentPage, code]);
 
     useEffect(() => {
@@ -266,7 +268,7 @@ const Preview: React.FC<PreviewProps> = ({
                     srcDoc={debouncedSrcDoc}
                     title="Preview"
                     className="w-full h-full border-none bg-white"
-                    sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin"
+                    sandbox="allow-scripts allow-modals allow-forms allow-popups"
                 />
             </div>
         </div>
@@ -295,6 +297,18 @@ function findFile(files: FileSystem, path: string): string | null {
     const lower = path.toLowerCase();
     const key = Object.keys(files).find(k => k.toLowerCase() === lower);
     return key ?? null;
+}
+
+function isPreviewErrorMessage(data: unknown): data is { type: 'preview-error'; error: PreviewError } {
+    if (!data || typeof data !== 'object') return false;
+    const message = (data as { error?: { message?: unknown } }).error?.message;
+    return (data as { type?: unknown }).type === 'preview-error' && typeof message === 'string';
+}
+
+function isPreviewNavigateMessage(data: unknown): data is { type: 'preview-navigate'; href: string } {
+    if (!data || typeof data !== 'object') return false;
+    return (data as { type?: unknown }).type === 'preview-navigate'
+        && typeof (data as { href?: unknown }).href === 'string';
 }
 
 function emptyDoc(): string {
