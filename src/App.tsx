@@ -137,28 +137,28 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
             onClick={() => {
               chat.clearMessages();
             }}
-            className="btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm min-h-[44px]"
+            className="btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm min-h-[44px] whitespace-nowrap text-[hsl(var(--foreground))]"
             title="Clear Chat History (Keep Code)"
           >
             <RefreshCw className="h-4 w-4" />
-            <span className="hidden xs:hidden sm:inline">Clear</span>
+            <span className="hidden sm:inline">Clear</span>
           </button>
 
           {/* New Chat Button */}
           <button
             onClick={handleNewChat}
-            className="btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm min-h-[44px]"
+            className="btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm min-h-[44px] whitespace-nowrap text-[hsl(var(--foreground))]"
             title="New Project (Reset All)"
           >
             <Plus className="h-4 w-4" />
-            <span className="hidden xs:hidden sm:inline">New</span>
+            <span className="hidden sm:inline">New</span>
           </button>
 
           {/* Retry Button (show only if there was an error) */}
           {chat.lastError && !chat.isLoading && (
             <button
               onClick={chat.retry}
-              className="btn-ghost flex items-center gap-2 px-3 py-2 text-sm text-amber-400 hover:text-amber-300"
+              className="btn-ghost flex items-center gap-2 px-3 py-2 text-sm text-amber-400 hover:text-amber-300 whitespace-nowrap"
               title="Retry last prompt"
             >
               <RefreshCw className="h-4 w-4" />
@@ -170,7 +170,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
           {editor.history.length > 0 && (
             <button
               onClick={editor.undo}
-              className="btn-ghost flex items-center gap-2 px-3 py-2 text-sm"
+              className="btn-ghost flex items-center gap-2 px-3 py-2 text-sm whitespace-nowrap text-[hsl(var(--foreground))]"
               title="Undo last AI change"
             >
               <RefreshCw className="h-4 w-4 rotate-180" />
@@ -181,7 +181,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
           {/* Copy Code Button */}
           <button
             onClick={handleCopy}
-            className="btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm"
+            className="btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm whitespace-nowrap text-[hsl(var(--foreground))]"
             title="Copy Code"
           >
             {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
@@ -190,7 +190,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
 
           <button
             onClick={navigation.goToLanding}
-            className="btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm"
+            className="btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm whitespace-nowrap text-[hsl(var(--foreground))]"
             title="Back to Home"
           >
             <Home className="h-4 w-4" />
@@ -199,7 +199,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
           
           <button
             onClick={() => setShowFirebaseModal(true)}
-            className={`btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm ${apiSettings.hasFirebase ? 'text-[#f6820c] hover:text-[#ff952b]' : ''}`}
+            className={`btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm whitespace-nowrap ${apiSettings.hasFirebase ? 'text-[#f6820c] hover:text-[#ff952b]' : 'text-[hsl(var(--foreground))]'}`}
             title="Database"
           >
             <Database className="h-4 w-4" />
@@ -209,7 +209,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
           {/* Download Button — zip in multi-file mode, single HTML in single-file mode */}
           <button
             onClick={() => editor.projectMode === 'multi' ? editor.downloadProject() : editor.download()}
-            className="btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm"
+            className="btn-ghost flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm whitespace-nowrap text-[hsl(var(--foreground))]"
             title={editor.projectMode === 'multi' ? 'Download Project ZIP' : 'Download Code'}
           >
             {editor.projectMode === 'multi'
@@ -221,7 +221,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
           </button>
           <button
             onClick={navigation.openDeploy}
-            className="btn-primary flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm"
+            className="btn-primary flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-sm whitespace-nowrap"
             title="Deploy Your App"
           >
             <Rocket className="h-4 w-4" />
