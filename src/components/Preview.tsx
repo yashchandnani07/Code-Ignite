@@ -159,6 +159,10 @@ const Preview: React.FC<PreviewProps> = ({
         };
     }, [rawSrcDoc, isLoading]);
 
+    const previewSrcDoc = isLoading
+        ? (debouncedSrcDoc || rawSrcDoc)
+        : rawSrcDoc;
+
 
     // ── Open in new tab ─────────────────────────────────────────────────────
     const handleOpenInNewTab = useCallback(() => {
@@ -274,7 +278,7 @@ const Preview: React.FC<PreviewProps> = ({
                 <iframe
                     ref={iframeRef}
                     key={currentPage} // Only remount when navigating to different pages, NOT on content changes
-                    srcDoc={debouncedSrcDoc}
+                    srcDoc={previewSrcDoc}
                     title="Preview"
                     className="w-full h-full border-none bg-white"
                     sandbox="allow-scripts allow-modals allow-forms allow-popups"
