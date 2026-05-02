@@ -386,3 +386,28 @@ html {
     height: 0;
   }
 }
+
+@media (min-width: 1024px) {
+  .workspace-main {
+    padding-bottom: 1rem !important;
+  }
+
+  .workspace-chat-panel {
+    display: flex !important;
+    width: 400px !important;
+  }
+
+  .workspace-panels {
+    display: flex !important;
+    flex-direction: row !important;
+  }
+
+  .workspace-editor-panel,
+  .workspace-preview-panel {
+    display: flex !important;
+  }
+
+  .workspace-mobile-tabs {
+    display: none !important;
+  }
+}

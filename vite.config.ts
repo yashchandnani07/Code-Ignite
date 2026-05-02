@@ -11,4 +11,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Monaco's worker files break the dep optimizer in rolldown-vite.
+  // Excluding it lets the new URL() + new Worker() pattern work correctly.
+  optimizeDeps: {
+    exclude: ['monaco-editor'],
+  },
+  worker: {
+    format: 'es',
+  },
 })

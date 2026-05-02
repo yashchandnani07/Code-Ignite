@@ -1,7 +1,49 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, Component } from 'react';
 import Editor from '@monaco-editor/react';
-import { Code2, Copy, Check, MessageSquare, Play, X, FolderOpen } from 'lucide-react';
+import { Code2, Copy, Check, MessageSquare, Play, X, FolderOpen, AlertTriangle } from 'lucide-react';
 import type { FileSystem, ProjectMode } from '../types';
+
+// Error boundary
+// Catches Monaco crashes (CDN blocked, worker failure, etc.) and shows
+// a working textarea so the user isn't staring at a blank screen.
+interface EditorErrorBoundaryState { hasError: boolean; errorMsg: string }
+
+class EditorErrorBoundary extends Component<
+    { children: React.ReactNode; fallbackCode: string; onChange: (v: string) => void },
+    EditorErrorBoundaryState
+> {
+    state: EditorErrorBoundaryState = { hasError: false, errorMsg: '' };
+
+    static getDerivedStateFromError(error: Error) {
+        return { hasError: true, errorMsg: error.message };
+    }
+
+    componentDidCatch(error: Error, info: React.ErrorInfo) {
+        console.error('[Monaco Error Boundary]', error, info.componentStack);
+    }
+
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div className="flex flex-col h-full">
+                    <div className="flex items-center gap-2 px-3 py-2 bg-amber-900/30 border-b border-amber-700/40 text-amber-300 text-xs">
+                        <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0" />
+                        <span>Editor failed to load. Using plain text mode.</span>
+                    </div>
+                    <textarea
+                        className="flex-1 w-full bg-[#1e1e1e] text-[#d4d4d4] p-4 font-mono text-sm resize-none outline-none"
+                        value={this.props.fallbackCode}
+                        onChange={e => this.props.onChange(e.target.value)}
+                        spellCheck={false}
+                    />
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
+// Main component
 
 interface CodeEditorProps {
     code: string;
@@ -88,7 +130,7 @@ const CodeEditorComponent: React.FC<CodeEditorProps> = ({
                     <span className="text-xs text-[hsl(var(--muted-foreground))] ml-1">
                         {formatSize(new Blob([displayCode]).size)}
                     </span>
-                    {/* Files toggle button — shows in multi-file mode or always for discoverability */}
+                    {/* Files toggle button, shown in multi-file mode or always for discoverability */}
                     {onToggleFileTree && (
                         <button
                             onClick={onToggleFileTree}
@@ -161,34 +203,41 @@ const CodeEditorComponent: React.FC<CodeEditorProps> = ({
                 </div>
             )}
 
-            {/* Editor */}
+            {/* Editor, wrapped in an error boundary so a Monaco crash shows a textarea fallback */}
             <div className="relative flex-1 min-h-0">
-                <Editor
-                    height="100%"
-                    language={monacoLang}
-                    value={displayCode}
-                    onChange={handleEditorChange}
-                    theme="vs-dark"
-                    options={{
-                        minimap: { enabled: false },
-                        fontSize: 13,
-                        wordWrap: 'on',
-                        padding: { top: 16, bottom: 16 },
-                        scrollBeyondLastLine: false,
-                        automaticLayout: true,
-                        fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
-                        fontLigatures: true,
-                        smoothScrolling: true,
-                        cursorBlinking: 'smooth',
-                        cursorSmoothCaretAnimation: 'on',
-                        lineNumbers: 'on',
-                        renderLineHighlight: 'line',
-                        scrollbar: {
-                            verticalScrollbarSize: 6,
-                            horizontalScrollbarSize: 6,
+                <EditorErrorBoundary fallbackCode={displayCode} onChange={v => handleEditorChange(v)}>
+                    <Editor
+                        height="100%"
+                        language={monacoLang}
+                        value={displayCode}
+                        onChange={handleEditorChange}
+                        theme="vs-dark"
+                        loading={
+                            <div className="flex items-center justify-center h-full bg-[#1e1e1e] text-[#888] text-sm">
+                                Loading editor...
+                            </div>
                         }
-                    }}
-                />
+                        options={{
+                            minimap: { enabled: false },
+                            fontSize: 13,
+                            wordWrap: 'on',
+                            padding: { top: 16, bottom: 16 },
+                            scrollBeyondLastLine: false,
+                            automaticLayout: true,
+                            fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
+                            fontLigatures: true,
+                            smoothScrolling: true,
+                            cursorBlinking: 'smooth',
+                            cursorSmoothCaretAnimation: 'on',
+                            lineNumbers: 'on',
+                            renderLineHighlight: 'line',
+                            scrollbar: {
+                                verticalScrollbarSize: 6,
+                                horizontalScrollbarSize: 6,
+                            }
+                        }}
+                    />
+                </EditorErrorBoundary>
             </div>
         </div>
     );

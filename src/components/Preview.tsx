@@ -74,8 +74,17 @@ const Preview: React.FC<PreviewProps> = ({
     // Listen for navigation and error messages from the iframe
     useEffect(() => {
         const handleMessage = (event: MessageEvent) => {
+            // In strict browsers (Brave/Comet), contentWindow may be null for
+            // sandboxed iframes without allow-same-origin. Fall back to checking
+            // that the source is a Window object (not null) instead of strict identity.
             const iframeWindow = iframeRef.current?.contentWindow;
-            if (!iframeWindow || event.source !== iframeWindow) return;
+            if (iframeWindow) {
+                if (event.source !== iframeWindow) return;
+            } else {
+                // contentWindow is inaccessible, accept messages only from non-null
+                // Window sources (the sandboxed iframe is the only child frame)
+                if (!event.source) return;
+            }
 
             if (isPreviewErrorMessage(event.data)) {
                 // Use the ref (not the closed-over prop) so we always read the live value
@@ -112,7 +121,7 @@ const Preview: React.FC<PreviewProps> = ({
 
         window.addEventListener('message', handleMessage);
         return () => window.removeEventListener('message', handleMessage);
-        // NOTE: isLoading intentionally NOT in deps — we read it via ref instead
+        // NOTE: isLoading intentionally NOT in deps, we read it via ref instead
     }, [currentPage, historyIndex, files]);
 
     // Navigation controls

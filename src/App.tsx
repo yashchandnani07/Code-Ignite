@@ -297,9 +297,9 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
       )}
 
       {/* Main Content */}
-      <main className="flex flex-1 overflow-hidden p-4 gap-4 pb-20 lg:pb-4">
+      <main className="workspace-main flex flex-1 overflow-hidden p-4 gap-4 pb-20 lg:pb-4">
         {/* Left Panel - Chat */}
-        <div className={`w-full lg:w-[400px] shrink-0 flex-col gap-4 ${navigation.activeTab === 'chat' ? 'flex' : 'hidden lg:flex'}`}>
+        <div className={`workspace-chat-panel w-full lg:w-[400px] shrink-0 flex-col gap-4 ${navigation.activeTab === 'chat' ? 'flex' : 'hidden lg:flex'}`}>
           <ChatInterface
             messages={chat.messages}
             onSendMessage={handleUserSendMessage}
@@ -311,8 +311,8 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
         </div>
 
         {/* Right Panel — Editor (with optional FileTree) & Preview */}
-        <div className={`flex-1 flex-col lg:flex-row gap-4 min-w-0 ${navigation.activeTab !== 'chat' ? 'flex' : 'hidden lg:flex'}`}>
-          <div className={`flex-1 overflow-hidden rounded-xl glass shadow-2xl ${navigation.activeTab === 'code' ? 'flex' : 'hidden lg:flex'}`}>
+        <div className={`workspace-panels flex-1 flex-col lg:flex-row gap-4 min-w-0 ${navigation.activeTab !== 'chat' ? 'flex' : 'hidden lg:flex'}`}>
+          <div className={`workspace-editor-panel flex-1 overflow-hidden rounded-xl glass shadow-2xl ${navigation.activeTab === 'code' ? 'flex' : 'hidden lg:flex'}`}>
             {/* FileTree sidebar — visible when multi-file mode is active AND showFileTree is true */}
             {editor.projectMode === 'multi' && showFileTree && (
               <div className="w-52 flex-shrink-0 overflow-hidden border-r border-[hsl(var(--border))]">
@@ -350,7 +350,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
               />
             </div>
           </div>
-          <div className={`flex-1 overflow-hidden rounded-xl glass shadow-2xl ${navigation.activeTab === 'preview' ? 'flex' : 'hidden lg:flex'}`}>
+          <div className={`workspace-preview-panel flex-1 overflow-hidden rounded-xl glass shadow-2xl ${navigation.activeTab === 'preview' ? 'flex' : 'hidden lg:flex'}`}>
             <Preview
               code={editor.code}
               projectMode={editor.projectMode}
@@ -365,7 +365,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
       </main>
 
       {/* Mobile Toggle Navigation */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center p-1.5 gap-1 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl z-50 lg:hidden ring-1 ring-white/10">
+      <div className="workspace-mobile-tabs fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center p-1.5 gap-1 bg-black/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl z-50 lg:hidden ring-1 ring-white/10">
         <button
           onClick={() => navigation.setActiveTab('chat')}
           className={`relative px-8 py-3 rounded-full text-sm font-bold transition-all duration-300 min-w-[100px] flex items-center justify-center gap-2 ${navigation.activeTab === 'chat'
