@@ -1,22 +1,23 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
-// https://vite.dev/config/
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 export default defineConfig({
   plugins: [react()],
   server: {
     host: '127.0.0.1',
-    port: 4173,
+    port: 4174,
     strictPort: true,
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
-  // Monaco's worker files break the dep optimizer in rolldown-vite.
-  // Excluding it lets the new URL() + new Worker() pattern work correctly.
   optimizeDeps: {
     exclude: ['monaco-editor'],
   },
