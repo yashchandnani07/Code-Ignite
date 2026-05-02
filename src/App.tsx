@@ -119,7 +119,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
   return (
     <div className="flex h-screen w-full flex-col bg-dot-pattern bg-glow overflow-hidden">
       {/* Header */}
-      <header className="glass flex h-14 shrink-0 items-center justify-between px-6 z-10">
+      <header className="glass flex h-14 shrink-0 items-center justify-between gap-3 px-3 sm:px-6 z-10">
         <div className="flex items-center gap-3">
           <div className="relative flex h-9 w-9 items-center justify-center rounded-lg overflow-hidden">
             <img src="/logo.png" alt="Code Ignite Logo" className="h-full w-full object-cover" />
@@ -131,7 +131,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
             <span className="text-[10px] text-[hsl(var(--muted-foreground))] hidden sm:block"> </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="top-nav-actions flex min-w-0 items-center gap-2">
           {/* Clear Chat Button */}
           <button
             onClick={() => {
@@ -141,7 +141,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
             title="Clear Chat History (Keep Code)"
           >
             <RefreshCw className="h-4 w-4" />
-            <span className="hidden sm:inline">Clear</span>
+            <span className="nav-label">Clear</span>
           </button>
 
           {/* New Chat Button */}
@@ -151,7 +151,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
             title="New Project (Reset All)"
           >
             <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">New</span>
+            <span className="nav-label">New</span>
           </button>
 
           {/* Retry Button (show only if there was an error) */}
@@ -162,7 +162,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
               title="Retry last prompt"
             >
               <RefreshCw className="h-4 w-4" />
-              <span className="hidden sm:inline">Retry</span>
+              <span className="nav-label">Retry</span>
             </button>
           )}
 
@@ -174,7 +174,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
               title="Undo last AI change"
             >
               <RefreshCw className="h-4 w-4 rotate-180" />
-              <span className="hidden sm:inline">Undo</span>
+              <span className="nav-label">Undo</span>
             </button>
           )}
 
@@ -185,7 +185,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
             title="Copy Code"
           >
             {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
-            <span className="hidden sm:inline">{copied ? 'Copied!' : 'Copy'}</span>
+            <span className="nav-label">{copied ? 'Copied!' : 'Copy'}</span>
           </button>
 
           <button
@@ -194,7 +194,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
             title="Back to Home"
           >
             <Home className="h-4 w-4" />
-            <span className="hidden sm:inline">Home</span>
+            <span className="nav-label">Home</span>
           </button>
           
           <button
@@ -203,7 +203,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
             title="Database"
           >
             <Database className="h-4 w-4" />
-            <span className="hidden sm:inline">Database</span>
+            <span className="nav-label">Database</span>
           </button>
           
           {/* Download Button — zip in multi-file mode, single HTML in single-file mode */}
@@ -215,7 +215,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
             {editor.projectMode === 'multi'
               ? <Archive className="h-4 w-4" />
               : <Download className="h-4 w-4" />}
-            <span className="hidden sm:inline">
+            <span className="nav-label">
               {editor.projectMode === 'multi' ? 'ZIP' : 'Download'}
             </span>
           </button>
@@ -225,7 +225,7 @@ Please identify the root cause of this error and apply minimal, targeted fixes. 
             title="Deploy Your App"
           >
             <Rocket className="h-4 w-4" />
-            <span className="hidden sm:inline">Deploy</span>
+            <span className="nav-label">Deploy</span>
           </button>
           <button
             onClick={navigation.openSettings}

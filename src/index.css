@@ -217,6 +217,20 @@ html {
   color: hsl(var(--foreground));
 }
 
+.top-nav-actions {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.top-nav-actions::-webkit-scrollbar {
+  display: none;
+}
+
+.top-nav-actions .nav-label {
+  display: inline !important;
+  color: currentColor;
+}
+
 /* ───────────────────────────────────────────────────────────────
    Input Utilities
    ─────────────────────────────────────────────────────────────── */
