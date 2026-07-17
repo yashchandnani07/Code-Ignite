@@ -264,11 +264,11 @@ const generateWithCustomOpenAI = async (
     baseURL: string,
 ): Promise<{ code: string; summary: string }> => {
     
-    const proxyBase = `${window.location.origin}/api/proxy`;
+    const proxyBase = typeof window !== 'undefined' ? `${window.location.origin}/api/proxy` : '';
     const openai = new OpenAI({ 
         apiKey, 
-        baseURL: proxyBase, 
-        defaultHeaders: { 'x-target-url': baseURL },
+        baseURL: proxyBase || baseURL, 
+        defaultHeaders: proxyBase ? { 'x-target-url': baseURL } : undefined,
         dangerouslyAllowBrowser: true, 
         maxRetries: 0 
     });

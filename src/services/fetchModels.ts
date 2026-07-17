@@ -81,13 +81,23 @@ const CLAUDE_MODELS: ModelOption[] = [
 // ── OpenAI-compatible — use baseUrl + /models ─────────────────────────────────
 async function fetchCompatibleModels(apiKey: string, baseUrl: string): Promise<ModelOption[]> {
     const targetUrl = baseUrl.replace(/\/$/, '') + '/models';
-    const proxyUrl = `${window.location.origin}/api/proxy`;
-    const res = await fetch(proxyUrl, {
-        headers: { 
-            Authorization: `Bearer ${apiKey}`,
-            'x-target-url': targetUrl,
-        },
-    });
+    const isBrowser = typeof window !== 'undefined';
+    let res;
+    if (isBrowser) {
+        const proxyUrl = `${window.location.origin}/api/proxy`;
+        res = await fetch(proxyUrl, {
+            headers: { 
+                Authorization: `Bearer ${apiKey}`,
+                'x-target-url': targetUrl,
+            },
+        });
+    } else {
+        res = await fetch(targetUrl, {
+            headers: { 
+                Authorization: `Bearer ${apiKey}`,
+            },
+        });
+    }
     if (!res.ok) throw new Error('OpenAI-compatible models fetch failed');
     const data = await res.json() as { data?: { id: string }[] };
     const rawModels = (data.data ?? []).map(m => ({ id: m.id, name: m.id, description: '' }));
