@@ -1,6 +1,5 @@
 import { Command } from "commander";
 import fs from "fs";
-import path from "path";
 import { fileURLToPath } from "url";
 
 import { handleLogin, handleConfig } from "./commands/login";
